@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>商品管理</title>
+    <style>
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+        img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+        }
+        .actions a {
+            margin: 0 5px;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>欢迎, {{ request.user.username }}</h1>
+
+    <!-- 新增商品类别 -->
+    <h2>新增商品类别</h2>
+    <form method="post" action="{% url 'add_category' %}">
+        {% csrf_token %}
+        <label>类别名称: <input type="text" name="category_name" required></label>
+        <label>
+            是否为小料类别:
+            <input type="radio" name="is_addon" value="yes"> 是
+            <input type="radio" name="is_addon" value="no" checked> 否
+        </label>
+        <button type="submit">添加类别</button>
+    </form>
+
+    <!-- 商品管理 -->
+    <h2>商品管理</h2>
+    <table>
+        <tr>
+            <th>商品ID</th>
+            <th>图片</th>
+            <th>名称</th>
+            <th>类别</th>
+            <th>价格</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>
+                {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                {% else %}
+                    <span>无图片</span>
+                {% endif %}
+            </td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.category.name }}</td>
+            <td>¥{{ item.price }}</td>
+            <td>{% if item.is_available %}在售{% else %}已下架{% endif %}</td>
+            <td class="actions">
+                <a href="#" onclick="editItem({{ item.id }})">编辑</a>
+                <a href="{% url 'delete_item' item.id %}" style="color: red;">删除</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">暂无商品</td></tr>
+        {% endfor %}
+    </table>
+
+    <!-- 新增/编辑商品 -->
+    <h2 id="form-title">添加商品</h2>
+    <form method="post" action="{% url 'add_item' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="item_id" id="item_id">
+        <label>名称: <input type="text" name="name" id="name" required></label>
+        <label>类别:
+            <select name="category_id" id="category_id">
+                {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>价格: <input type="number" step="0.01" name="price" id="price" required></label>
+        <label>商品图片: <input type="file" name="image" id="image"></label>
+        <button type="submit">提交</button>
+    </form>
+
+    <script>
+        function editItem(itemId) {
+            fetch(`/merchant/edit_item/${itemId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("form-title").textContent = "编辑商品";
+                    document.getElementById("item_id").value = data.id;
+                    document.getElementById("name").value = data.name;
+                    document.getElementById("category_id").value = data.category_id;
+                    document.getElementById("price").value = data.price;
+                });
+        }
+    </script>
+
+</body>
+</html>
