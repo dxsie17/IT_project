@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>订单管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            background: #4f6843;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+        .navbar h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .nav-links {
+            display: flex;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+        .nav-links a.active {
+            background: #37492f;
+        }
+        .container {
+            display: flex;
+        }
+        .sidebar {
+            width: 200px;
+            background: #4f6843;
+            padding: 20px;
+            color: white;
+            height: 100vh;
+        }
+        .sidebar a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            margin: 5px 0;
+        }
+        .sidebar a.active {
+            background: #37492f;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        .order {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+        }
+        .order h3 {
+            margin: 0;
+        }
+        .order-items {
+            margin-top: 10px;
+        }
+        .order-actions {
+            margin-top: 10px;
+        }
+        .btn {
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-finish {
+            background: green;
+            color: white;
+        }
+        .btn-cancel {
+            background: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+        <h1>I FEEL</h1>
+        <div class="nav-links">
+            <a href="{% url 'merchant_orders' %}" class="active">Orders</a>
+            <a href="{% url 'manage_items' %}">Item Catalog</a>
+            <a href="{% url 'merchant_dashboard' %}">Management</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 左侧导航栏 -->
+        <div class="sidebar">
+            <h2>订单状态</h2>
+            <a href="?status=Ongoing" class="{% if status_filter == 'Ongoing' %}active{% endif %}">Ongoing</a>
+            <a href="?status=Finished" class="{% if status_filter == 'Finished' %}active{% endif %}">Finished</a>
+            <a href="?status=Canceled" class="{% if status_filter == 'Canceled' %}active{% endif %}">Canceled</a>
+        </div>
+
+        <!-- 主要内容 -->
+        <div class="content">
+            <h2>订单管理</h2>
+
+            <form method="GET">
+                <input type="text" name="search" placeholder="搜索订单编号 / 商品 / 用户" value="{{ request.GET.search }}">
+                <button type="submit">搜索</button>
+            </form>
+
+            {% if orders %}
+                {% for order in orders %}
+                    <div class="order">
+                        <h3>订单号: {{ order.order_number }}</h3>
+                        <p>用户: {{ order.customer.username }}</p>
+                        <p>总价: ¥{{ order.total_price }}</p>
+                        <p>备注: {{ order.remark }}</p>
+                        <p>状态: {{ order.get_status_display }}</p>
+                        <p>创建时间: {{ order.created_at }}</p>
+
+                        <div class="order-items">
+                            <h4>商品:</h4>
+                            <ul>
+                                {% for order_item in order.orderitem_set.all %}
+                                    <li>{{ order_item.item.name }} x{{ order_item.quantity }} - ¥{{ order_item.item.price }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        {% if order.status == "Ongoing" %}
+                        <div class="order-actions">
+                            <form method="POST" action="{% url 'update_order_status' order.id %}">
+                                {% csrf_token %}
+                                <button type="submit" name="status" value="Finished" class="btn btn-finish">完成</button>
+                                <button type="submit" name="status" value="Canceled" class="btn btn-cancel">取消</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>暂无订单</p>
+            {% endif %}
+        </div>
+    </div>
+
+</body>
+</html>
