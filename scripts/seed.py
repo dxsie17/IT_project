@@ -1,29 +1,61 @@
 import os
 import django
+
+# **1️⃣ 确保 Django 设置正确**
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "it_project.settings")  # 替换 "it_project" 为你的项目名
+django.setup()  # **必须在 models 导入前执行**
+
 from django.utils.timezone import now
-
-# 设置 Django 环境
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "shop.settings")
-django.setup()
-
 from django.contrib.auth.models import User
-from shop.models import Merchant, Category, Item, Order, OrderItem, Review
+from shop.models import Merchant, UserProfile, Category, Item, Order, OrderItem, Review
+
+def create_users():
+    """ 创建超级管理员、商家和用户 """
+    admin_user, created = User.objects.get_or_create(username="admin", defaults={
+        "email": "admin@example.com", "is_staff": True, "is_superuser": True
+    })
+    if created:
+        admin_user.set_password("admin123")
+        admin_user.save()
+        print("✅ 超级管理员创建成功: admin / admin123")
+
+    merchant_user, created = User.objects.get_or_create(username="merchant1", defaults={
+        "email": "merchant1@example.com", "is_staff": True
+    })
+    if created:
+        merchant_user.set_password("merchant_password123")
+        merchant_user.save()
+        print("✅ 商家账号创建成功: merchant1 / merchant_password123")
+
+    customer_user, created = User.objects.get_or_create(username="customer1", defaults={
+        "email": "customer1@example.com"
+    })
+    if created:
+        customer_user.set_password("customer_password123")
+        customer_user.save()
+        print("✅ 用户账号创建成功: customer1 / customer_password123")
 
 
-def create_admin_user():
-    """ 创建超级用户 """
-    if not User.objects.filter(username="admin").exists():
-        User.objects.create_superuser("admin", "admin@example.com", "admin123")
-        print("✅ 创建超级用户: admin / admin123")
-    else:
-        print("✅ 超级用户已存在")
+def create_profiles():
+    """ 为商家和用户创建 UserProfile """
+    merchant_user = User.objects.get(username="merchant1")
+    customer_user = User.objects.get(username="customer1")
+
+    merchant_profile, created = UserProfile.objects.get_or_create(user=merchant_user, defaults={"is_merchant": True})
+    if created:
+        print("✅ 商家 Profile 创建成功")
+
+    customer_profile, created = UserProfile.objects.get_or_create(user=customer_user, defaults={"is_merchant": False})
+    if created:
+        print("✅ 用户 Profile 创建成功")
 
 
-def create_merchants():
-    """ 创建商家 """
-    user, _ = User.objects.get_or_create(username="merchant1", defaults={"email": "merchant1@example.com"})
-    merchant, _ = Merchant.objects.get_or_create(user=user, store_name="I Feel")
-    print(f"✅ 商家创建成功: {merchant.store_name}")
+def create_merchant():
+    """ 创建商家信息 """
+    merchant_user = User.objects.get(username="merchant1")
+    merchant, created = Merchant.objects.get_or_create(user=merchant_user, store_name="I Feel Tea Shop")
+    if created:
+        print("✅ 商家信息创建成功: I Feel Tea Shop")
 
 
 def create_categories():
@@ -37,13 +69,10 @@ def create_categories():
 def create_items():
     """ 创建商品 """
     merchant = Merchant.objects.first()
-    if not merchant:
-        print("❌ 错误: 没有找到商家，请先创建商家！")
-        return
-
     category = Category.objects.filter(name="奶茶").first()
-    if not category:
-        print("❌ 错误: 没有找到类别，请先创建类别！")
+
+    if not merchant or not category:
+        print("❌ 商家或类别未找到，无法创建商品")
         return
 
     items = [
@@ -54,84 +83,70 @@ def create_items():
 
     for item in items:
         Item.objects.get_or_create(
-            merchant=merchant,
-            name=item["name"],
-            defaults={"description": item["description"], "price": item["price"], "category": category},
+            merchant=merchant, name=item["name"],
+            defaults={"description": item["description"], "price": item["price"], "category": category}
         )
-    print("✅ 商品已添加")
+    print("✅ 商品数据已添加")
 
 
 def create_orders():
     """ 创建测试订单 """
-    user, _ = User.objects.get_or_create(username="customer1", defaults={"email": "customer1@example.com", "password": "customer123"})
+    customer = User.objects.get(username="customer1")
+    items = list(Item.objects.all())
 
-    items = list(Item.objects.all())  # 获取所有商品
     if not items:
-        print("❌ 错误: 订单创建失败，未找到商品！")
+        print("❌ 无商品，无法创建订单")
         return
 
-    # 确保 order_number 唯一
-    order_number_1 = "0001"
-    order_number_2 = "0002"
-
     order1, created1 = Order.objects.get_or_create(
-        order_number=order_number_1,
-        defaults={"customer": user, "total_price": items[0].price * 2, "status": "Ongoing", "created_at": now()}
+        order_number="0001",
+        defaults={"customer": customer, "total_price": items[0].price * 2, "status": "Ongoing", "created_at": now()}
     )
 
     order2, created2 = Order.objects.get_or_create(
-        order_number=order_number_2,
-        defaults={"customer": user, "total_price": items[1].price * 1, "status": "Finished", "created_at": now()}
+        order_number="0002",
+        defaults={"customer": customer, "total_price": items[1].price, "status": "Finished", "created_at": now()}
     )
 
     if created1:
         OrderItem.objects.create(order=order1, item=items[0], quantity=2)
         print(f"✅ 订单创建成功: {order1.order_number}")
-    else:
-        print(f"✅ 订单已存在: {order1.order_number}")
 
     if created2:
         OrderItem.objects.create(order=order2, item=items[1], quantity=1)
         print(f"✅ 订单创建成功: {order2.order_number}")
-    else:
-        print(f"✅ 订单已存在: {order2.order_number}")
 
 
 def create_reviews():
     """ 添加商品评价 """
-    user = User.objects.filter(username="customer1").first()
-    if not user:
-        print("❌ 错误: 没有找到用户，请先创建用户！")
-        return
-
+    customer = User.objects.get(username="customer1")
     items = list(Item.objects.all())
+
     if not items:
-        print("❌ 错误: 没有找到商品，请先创建商品！")
+        print("❌ 无商品，无法创建评论")
         return
 
     reviews = [
-        {"item": items[0], "rating": 5, "comment": "这款珍珠奶茶太棒了，珍珠Q弹，奶茶很香！"},
-        {"item": items[1], "rating": 4, "comment": "红豆奶茶很好喝，就是有点甜了"},
-        {"item": items[2], "rating": 5, "comment": "抹茶拿铁味道刚刚好，喜欢"},
+        {"item": items[0], "rating": 5, "comment": "珍珠奶茶太棒了！"},
+        {"item": items[1], "rating": 4, "comment": "红豆奶茶很好喝，但有点甜"},
+        {"item": items[2], "rating": 5, "comment": "抹茶拿铁味道很好"},
     ]
 
     for review in reviews:
         Review.objects.get_or_create(
-            user=user,
+            user=customer,
             item=review["item"],
-            defaults={
-                "rating": review["rating"],
-                "comment": review["comment"],
-            },
+            defaults={"rating": review["rating"], "comment": review["comment"]}
         )
     print("✅ 评论数据已添加")
 
 
 if __name__ == "__main__":
-    create_admin_user()
-    create_merchants()
+    create_users()
+    create_profiles()
+    create_merchant()
     create_categories()
     create_items()
     create_orders()
     create_reviews()
-    print("🎉 数据库初始化完成！")
+    print("🎉 数据填充完成！")
