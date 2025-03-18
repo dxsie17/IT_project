@@ -1,0 +1,26 @@
+$primary-color: #4f6843;
+$secondary-color: #2f4729;
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* 顶部导航 */
+.nav {
+    background: $primary-color;
+    padding: 15px;
+    text-align: center;
+}
+.nav a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    margin: 0 10px;
+    font-size: 18px;
+}
+.nav a.active {
+    background: $secondary-color;
+    font-weight: bold;
+}

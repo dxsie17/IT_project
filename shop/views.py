@@ -1,8 +1,13 @@
+from django.contrib.auth.models import User
+from django.middleware.csrf import get_token
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.db.models import Q
 from .models import Item, Order, OrderItem, Review, UserProfile, Merchant, Category
+import json
 
 
 """
@@ -33,129 +38,175 @@ def login(request):
 """商家后台"""
 @login_required
 def merchant_dashboard(request):
-    if not request.user.is_authenticated:
-        # 自动登录商家账号（这里假设 merchant1 为默认商家）
-        user = User.objects.filter(username="merchant1").first()
-        if user:
-            user.backend = "django.contrib.auth.backends.ModelBackend"  # 指定认证后端
-            login(request, user)
-            print(f"✅ 自动登录用户: {user.username}")
+    user = request.user
+    print(f"🛠️ 当前用户: {user.username}")
 
-    # 确保 `UserProfile` 存在并且是商家
-    if not hasattr(request.user, "userprofile") or not request.user.userprofile.is_merchant:
-        print("❌ 用户不是商家，跳转到首页")
-        return redirect("/")
+    # 订单状态筛选
+    status_filter = request.GET.get("status", "Ongoing")
+    print(f"🛠️ 当前订单筛选状态: {status_filter}")
 
-    merchant = getattr(request.user, "merchant", None)
-    if merchant is None:
-        print("❌ 用户没有关联的 Merchant 记录，跳转到首页")
-        return redirect("/")
+    if user.is_superuser:
+        print("✅ 超管访问商家后台")
+        items = Item.objects.all()
+        orders = Order.objects.filter(status=status_filter)
+        categories = Category.objects.all()
+        reviews = Review.objects.all()
+    else:
+        if not hasattr(user, "userprofile") or not user.userprofile.is_merchant:
+            print("❌ 用户不是商家，跳转到首页")
+            return redirect("/")
 
-    print("✅ 用户是商家，进入商家后台")
-    items = Item.objects.filter(merchant=merchant)
+        merchant = user.merchant
+        orders = Order.objects.filter(items__merchant=merchant, status=status_filter).distinct()
+        items = Item.objects.filter(merchant=merchant)
+        categories = Category.objects.all()
+        reviews = Review.objects.filter(merchant=merchant)
 
-    return render(request, "merchant/dashboard.html", {"items": items})
+    return render(request, "merchant/dashboard.html", {
+        "items": items,
+        "orders": orders,
+        "categories": categories,
+        "reviews": reviews
+    })
+
+
+
+"""📌 新增：提供 AJAX 订单筛选 API"""
+@login_required
+def get_orders_by_status(request, status):
+    """前端 AJAX 请求不同状态的订单"""
+    user = request.user
+    if not hasattr(user, "userprofile") or not user.userprofile.is_merchant:
+        return JsonResponse({"success": False, "error": "Permission denied"}, status=403)
+
+    merchant = user.merchant
+    orders = Order.objects.filter(items__merchant=merchant, status=status).distinct()
+
+    orders_data = []
+    for order in orders:
+        orders_data.append({
+            "order_number": order.order_number,
+            "status": order.status,
+            "customer": order.customer.username,
+            "total_price": order.total_price,
+            "created_at": order.created_at.strftime("%Y-%m-%d %H:%M"),
+            "items": [
+                {
+                    "name": item.product.name,
+                    "image": item.product.image.url if item.product.image else "",
+                    "price": item.product.price,
+                    "quantity": item.quantity
+                }
+                for item in order.orderitem_set.all()
+            ]
+        })
+
+    return JsonResponse({"success": True, "orders": orders_data})
+
 
 
 """商品管理"""
 @login_required
 def manage_items(request):
-    """ 商家管理商品 """
-    items = Item.objects.filter(merchant=request.user.merchant)  # 确保商家正确获取自己的商品
-    categories = Category.objects.all()
-    return render(request, "merchant/item_catalog.html", {"items": items, "categories": categories})
+    if not request.user.is_superuser and (not hasattr(request.user, "userprofile") or not request.user.userprofile.is_merchant):
+        return redirect("/")
+
+    items = Item.objects.all()
+    return render(request, "merchant/item_catalog.html", {"items": items})
 
 
 """添加商品类别"""
 @login_required
 def add_category(request):
     if request.method == "POST":
-        name = request.POST.get("category_name")
-        is_addon = request.POST.get("is_addon") == "yes"
-        Category.objects.create(name=name, is_addon=is_addon)
-        return redirect("merchant/manage_items")
+        category_name = request.POST.get("category_name")
+        if category_name:
+            Category.objects.create(name=category_name)
+            return redirect("manage_items")
 
 
-"""商家添加、编辑商品"""
+"""商家添加商品"""
 @login_required
-def add_or_edit_item(request):
-    merchant = request.user.merchant  # 确保用户是商家
-    categories = Category.objects.all()  # 获取所有类别
-
+def add_item(request):
     if request.method == "POST":
-        item_id = request.POST.get("item_id")
         name = request.POST.get("name")
-        category_id = request.POST.get("category_id")
         price = request.POST.get("price")
-        image = request.FILES.get("image")
+        category_id = request.POST.get("category_id")
 
         category = get_object_or_404(Category, id=category_id)
-
-        if item_id:  # 编辑商品
-            item = get_object_or_404(Item, id=item_id, merchant=merchant)
-            item.name = name
-            item.category = category
-            item.price = price
-            if image:
-                item.image = image
-            item.save()
-        else:  # 新增商品
-            Item.objects.create(name=name, category=category, price=price, image=image, merchant=merchant)
-
+        Item.objects.create(name=name, price=price, category=category)
         return redirect("manage_items")
 
-    return render(request, "merchant/manage_items.html", {"categories": categories})
+    return render(request, "merchant/add_item.html")
+"""商家编辑商品"""
+@login_required
+def edit_item(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
 
+    if request.method == "POST":
+        item.name = request.POST.get("name", item.name)
+        item.price = request.POST.get("price", item.price)
+        item.save()
+        return redirect("manage_items")
+
+    return render(request, "merchant/edit_item.html", {"item": item})
 
 """删除商品"""
 @login_required
 def delete_item(request, item_id):
-    item = get_object_or_404(Item, id=item_id, merchant=request.user.merchant)
-    item.delete()
-    return redirect("merchant_item_catalog")
-
-
-"""获取商品详情（用于前端 JS 进行编辑）"""
-def edit_item(request, item_id):
     item = get_object_or_404(Item, id=item_id)
-    return JsonResponse({"id": item.id, "name": item.name, "category_id": item.category.id, "price": str(item.price)})
+    item.delete()
+    return redirect("manage_items")
 
 
 """商家管理订单"""
 @login_required
 def merchant_orders(request):
-    if not hasattr(request.user, "userprofile") or not request.user.userprofile.is_merchant:
-        return redirect("/")  # 非商家无法访问
-
-    search_query = request.GET.get("search", "")
-    status_filter = request.GET.get("status", "Ongoing")
-
-    # 只获取该商家名下的订单
-    orders = Order.objects.filter(items__merchant=request.user.merchant, status=status_filter).distinct()
-
-    # 应用搜索过滤条件
-    if search_query:
-        orders = orders.filter(
-            Q(order_number__icontains=search_query) |
-            Q(customer__username__icontains=search_query) |
-            Q(items__name__icontains=search_query)
-        ).distinct()
-
-    return render(request, "merchant/orders.html", {"orders": orders, "status_filter": status_filter})
-
-
-"""商家修改订单状态"""
-@login_required
-def update_order_status(request, order_id):
-    if not hasattr(request.user, "userprofile") or not request.user.userprofile.is_merchant:
+    if not request.user.is_superuser and (not hasattr(request.user, "userprofile") or not request.user.userprofile.is_merchant):
         return redirect("/")
 
-    order = get_object_or_404(Order, id=order_id, items__merchant=request.user.merchant)
+    status_filter = request.GET.get("status", "Ongoing")
+    orders = Order.objects.filter(status=status_filter)
+
+    return render(request, "merchant/orders.html", {"orders": orders})
+
+"""商家修改订单状态"""
+@csrf_protect
+@login_required
+def update_order_status(request, order_id):
+    expected_csrf_token = get_token(request)
+    received_csrf_token = request.headers.get("X-CSRFToken", "")
+
+    print(f"🛠️ Received CSRF Token: {received_csrf_token}")
+    print(f"🛠️ Expected CSRF Token: {expected_csrf_token}")
+
+    if received_csrf_token != expected_csrf_token:
+        return JsonResponse({"success": False, "error": "CSRF token mismatch"}, status=403)
+
+    if not hasattr(request.user, "userprofile") or not request.user.userprofile.is_merchant:
+        return JsonResponse({"success": False, "error": "Permission denied"}, status=403)
+
+    order = get_object_or_404(Order, id=order_id)
 
     if request.method == "POST":
-        new_status = request.POST.get("status", "")
-        if new_status in [choice[0] for choice in Order.STATUS_CHOICES]:  # 确保状态合法
-            order.status = new_status
-            order.save()
+        try:
+            data = json.loads(request.body)
+            new_status = data.get("status")
 
-    return redirect("merchant_orders")
+            if new_status in [choice[0] for choice in Order.STATUS_CHOICES]:
+                order.status = new_status
+                order.save()
+                return JsonResponse({"success": True, "new_status": new_status})
+
+            return JsonResponse({"success": False, "error": "Invalid status"}, status=400)
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=405)
+
+
+""" 查看用户评价 """
+@login_required
+def view_reviews(request):
+    reviews = Review.objects.all()
+    return render(request, "merchant/reviews.html", {"reviews": reviews})

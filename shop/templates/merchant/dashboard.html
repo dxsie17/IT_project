@@ -1,45 +1,80 @@
-<!-- 商品管理页面 -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
-    <title>商品管理 - I FEEL</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .container { width: 80%; margin: 0 auto; text-align: center; }
-        .nav { background: #5a7f4f; padding: 15px; color: white; }
-        .nav a { color: white; margin: 0 15px; text-decoration: none; }
-        .product-container { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
-        .product { border: 1px solid #ddd; padding: 10px; margin: 10px; width: 200px; text-align: center; }
-        .product img { width: 100px; height: 100px; object-fit: cover; }
-        .actions button { margin-top: 5px; padding: 5px 10px; }
-        .add-product { border: 2px dashed #ccc; padding: 30px; margin: 10px; width: 200px; text-align: center; cursor: pointer; }
-    </style>
+    <title>商家后台 - I FEEL</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 </head>
 <body>
+    <!-- 顶部导航栏 -->
     <div class="nav">
-        <h1>商品管理 - I FEEL</h1>
-        <a href="{% url 'merchant_dashboard' %}">返回后台</a>
+        <a href="#" class="nav-link active" data-target="orders-section">Orders</a>
+        <a href="#" class="nav-link" data-target="item-catalog-section">Item Catalog</a>
+        <a href="#" class="nav-link" data-target="management-section">Management</a>
     </div>
 
-    <div class="container">
-        <h2>管理你的商品</h2>
-        <div class="product-container">
-            {% for item in items %}
-            <div class="product">
-                <img src="{{ item.image.url }}" alt="{{ item.name }}">
-                <p>{{ item.name }}</p>
-                <p>¥{{ item.price }}</p>
-                <button onclick="window.location.href='{% url 'edit_item' item.id %}'">编辑</button>
-                <button onclick="window.location.href='{% url 'delete_item' item.id %}'" style="background-color: red; color: white;">删除</button>
+    <!-- Orders 页面 -->
+    <div id="orders-section" class="tab-content">
+        <h2>订单管理</h2>
+        <div class="order-container">
+            <div class="sidebar">
+                <a href="#" class="status-link active" data-status="Ongoing">Ongoing</a>
+                <a href="#" class="status-link" data-status="Finished">Finished</a>
+                <a href="#" class="status-link" data-status="Canceled">Canceled</a>
             </div>
-            {% empty %}
-            <p>暂无商品</p>
-            {% endfor %}
-            <div class="add-product" onclick="window.location.href='{% url 'add_item' %}'">
-                ➕ 添加商品
+            <div class="order-list">
+                <div class="order-card" data-status="Ongoing">
+                    <h3>No. 0001</h3>
+                    <img src="static/img/milk_tea.jpg" alt="奶茶">
+                    <div class="order-details">
+                        <p>商品: A-0001 XXX Milk Tea</p>
+                        <p>Size: Small | Sugar: 50% | Ice: Normal</p>
+                        <p>价格: <strong>£8.00</strong> x 2</p>
+                        <p>备注: XXXXXXXXXXXX</p>
+                        <p>客户: ABC0001 | 电话: XXXXXXXXXX</p>
+                        <p>总价: <strong>£24.00</strong></p>
+                        <div class="order-actions">
+                            <button class="finish-btn" data-order-id="1">Finish</button>
+                            <button class="cancel-btn" data-order-id="1">Cancel</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Item Catalog 页面 -->
+    <div id="item-catalog-section" class="tab-content hidden">
+        <h2>商品管理</h2>
+        <div class="category-sidebar">
+            <a href="#" class="category-link active">Milk Tea</a>
+            <a href="#" class="category-link">Addons</a>
+            <a href="#" class="category-link add-category">+ 添加类别</a>
+        </div>
+        <div class="product-container">
+            <div class="product-card">
+                <img src="static/img/default.jpg" alt="XXX Milk Tea">
+                <p>A-0001 XXX Milk Tea</p>
+                <p>£8.00</p>
+                <button class="delist-btn">Delist</button>
+            </div>
+            <p>暂无商品</p>
+        </div>
+    </div>
+
+    <!-- Management 页面 -->
+    <div id="management-section" class="tab-content hidden">
+        <h2>用户评价</h2>
+        <div class="review">
+            <p>用户: JohnDoe</p>
+            <p>评分: ⭐⭐⭐⭐⭐</p>
+            <p>评论: 这家店的奶茶太好喝了！</p>
+            <button class="reply-btn">回复</button>
+        </div>
+    </div>
+
+    <script src="static/js/dashboard.js"></script>
 </body>
 </html>

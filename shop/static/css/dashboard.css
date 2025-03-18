@@ -1,0 +1,50 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* 顶部导航 */
+.nav {
+    background: #4f6843;
+    padding: 15px;
+    text-align: center;
+}
+.nav a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    margin: 0 10px;
+    font-size: 18px;
+}
+.nav a.active {
+    background: #2f4729;
+    font-weight: bold;
+}
+
+/* 订单管理 */
+.order-container {
+    display: flex;
+}
+.sidebar {
+    width: 200px;
+    background: #4f6843;
+    padding: 20px;
+    color: white;
+    height: 100vh;
+}
+.sidebar a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: white;
+    font-size: 18px;
+}
+.sidebar a.active {
+    background: #37492f;
+}
+
+/* 隐藏默认的内容 */
+.hidden {
+    display: none;
+}
