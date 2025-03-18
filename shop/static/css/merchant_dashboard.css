@@ -1,0 +1,179 @@
+/* 全局样式 */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+/* 顶部导航栏 */
+.navbar {
+    background: #5a7f4f;
+    padding: 10px 20px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* 使导航栏内容居中 */
+    position: relative;
+}
+
+/* 商家名称（左上角，原 I FEEL 位置） */
+.store-info {
+    font-size: 22px; /* 增大字体 */
+    font-weight: bold;
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+}
+
+/* 右上角登出按钮 */
+.logout {
+    position: absolute;
+    right: 20px;
+    background: red;
+    padding: 6px 12px;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+/* 选项卡 */
+.nav-links {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background 0.3s;
+    cursor: pointer;
+}
+
+.nav-links a.active {
+    font-weight: bold;
+    border-bottom: 3px solid white;
+}
+
+/* 主容器布局 */
+.container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* 侧边栏 */
+.sidebar {
+    width: 160px;
+    background: #5a7f4f;
+    color: white;
+    padding: 15px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 侧边栏导航（字体放大） */
+.sidebar a {
+    display: block;
+    color: white;
+    padding: 14px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 20px; /* 进一步放大 */
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.sidebar a.active {
+    background: #37492f;
+    font-weight: bold;
+}
+
+/* 主要内容 */
+.content {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+/* 订单卡片 */
+.order {
+    background: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 订单项 */
+.order-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 商品图片放大 */
+.order-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 3px;
+}
+
+/* 商品管理 */
+.product-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.product {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 10px;
+    width: 180px;
+    text-align: center;
+    background: white;
+}
+
+.product img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+}
+
+/* 按钮样式 */
+.btn {
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 8px;
+}
+
+.btn.finish {
+    background: #5a7f4f;
+    color: white;
+}
+
+.btn.cancel {
+    background: red;
+    color: white;
+}
+
+/* 选项卡内容 */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
