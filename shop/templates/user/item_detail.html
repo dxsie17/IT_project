@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ item.name }}</title>
+    <style>
+        .detail-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .detail-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .detail-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="detail-info">
+        <h1>{{ item.name }}</h1>
+        <p class="price">Price: ￡{{ item.price }}</p>
+        <div class="description">
+            <h3>Product Description</h3>
+            <p>{{ item.description|linebreaks }}</p>
+        </div>
+        <button onclick="addToBasket({{ item.id }})" 
+            style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+        加入购物车
+        </button>
+        <a href="javascript:void(0)" onclick="goBackToList()" class="back-link">返回列表</a>
+    </div>
+</body>
+</html>
