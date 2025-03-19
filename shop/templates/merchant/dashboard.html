@@ -4,27 +4,53 @@
 <head>
     <meta charset="UTF-8">
     <title>商家后台 - {{ store_name }}</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/merchant_dashboard.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/merchant_dashboard.css' %}?v=2">
 </head>
 <body>
 
     <!-- 顶部导航栏 -->
     <div class="navbar">
-        <div class="store-info">{{ store_name }}</div>  <!-- 商家信息（左上角） -->
+        <div class="store-info">{{ store_name }}</div>
         <div class="nav-links">
-            <a href="javascript:void(0);" class="tab active" onclick="switchTab('orders')">Orders</a>
-            <a href="javascript:void(0);" class="tab" onclick="switchTab('items')">Item Catalog</a>
-            <a href="javascript:void(0);" class="tab" onclick="switchTab('management')">Management</a>
+            <a href="javascript:void(0);" class="tab active" data-tab="orders">Orders</a>
+            <a href="javascript:void(0);" class="tab" data-tab="items">Item Catalog</a>
+            <a href="javascript:void(0);" class="tab" data-tab="management">Management</a>
         </div>
         <a href="{% url 'logout' %}" class="logout">登出</a>
     </div>
 
     <div class="container">
-        <!-- 侧边栏 -->
-        <div class="sidebar">
+        <!-- 订单管理的侧边栏 -->
+        <div class="sidebar orders-sidebar">
             <a href="?status=Ongoing" class="{% if status_filter == 'Ongoing' %}active{% endif %}">Ongoing</a>
             <a href="?status=Finished" class="{% if status_filter == 'Finished' %}active{% endif %}">Finished</a>
             <a href="?status=Canceled" class="{% if status_filter == 'Canceled' %}active{% endif %}">Canceled</a>
+        </div>
+
+        <!-- 商品管理的侧边栏 -->
+        <div class="sidebar items-sidebar" style="display: none;">
+            <a href="javascript:void(0);" class="category-link active" data-category-id="">全部商品</a>
+            {% if categories %}
+                {% for category in categories %}
+                    <a href="javascript:void(0);" class="category-link" data-category-id="{{ category.id }}">{{ category.name }}</a>
+                {% endfor %}
+            {% else %}
+                <p class="no-category">暂无商品类别</p>
+            {% endif %}
+             <!-- ✅ 以 `Tab` 形式展示新增类别 -->
+            <a href="javascript:void(0);" id="add-category-tab" class="category-link add-category">+ 新增类别</a>
+
+            <!-- 新增类别表单 (默认隐藏) -->
+            <div id="add-category-form" style="display: none;">
+                <input type="text" id="new-category-name" placeholder="类别名称">
+                <button onclick="submitCategory()">提交</button>
+                <button onclick="hideCategoryForm()">取消</button>
+            </div>
+        </div>
+
+        <!-- management管理的侧边栏 -->
+        <div class="sidebar management-sidebar" style="display: none;">
+                <a href="javascript:void(0);" class="tab-link active" data-tab="review">Review</a>
         </div>
 
         <!-- 订单管理 -->
@@ -62,41 +88,107 @@
                 <p>暂无订单</p>
             {% endif %}
         </div>
+
+        <!-- 商品管理 -->
+        <div id="items" class="content tab-content" style="display: none;">
+            <div id="item-list" class="item-list">
+                {% for item in items %}
+                <div class="item-card" data-category-id="{{ item.category.id }}">
+                    <img src="{% if item.image %}{{ item.image.url }}{% else %}{% static 'img/1.jpeg' %}{% endif %}" alt="{{ item.name }}">
+                    <div class="item-info">
+                        <h3>{{ item.name }}</h3>
+                        <p>ID: {{ item.id }}</p>
+                        <p>价格: £{{ item.price }}</p>
+                        <p>分类: {{ item.category.name }}</p>
+
+                        <!-- 商品管理按钮 -->
+                        <button id="toggle-btn-{{ item.id }}"
+                            onclick="toggleItemAvailability({{ item.id }}, {{ item.is_available|yesno:'false,true' }})">
+                        {% if item.is_available %}Delist{% else %}List{% endif %}
+                        </button>
+                        <button class="edit-btn" onclick="editItem({{ item.id }})">Edit</button>
+                        <button class="delete-btn" onclick="deleteItem({{ item.id }})">Delete</button>
+                    </div>
+                </div>
+                {% endfor %}
+                <!-- ✅ 新增商品按钮 (作为商品卡片) -->
+                <div id="add-item-card" class="item-card add-item-card" onclick="showAddItemForm()">
+                    <span class="add-icon">+</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 商品编辑弹窗 -->
+        <div id="edit-item-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeEditItemModal()">&times;</span>
+                <h2>编辑商品</h2>
+
+                <!-- 隐藏的商品 ID -->
+                <input type="hidden" id="edit-item-id">
+
+                <!-- 商品名 -->
+                <div class="modal-row">
+                    <label class="modal-label" for="edit-item-name">商品名:</label>
+                    <input type="text" id="edit-item-name" class="modal-input">
+                </div>
+
+                <!-- 价格 -->
+                <div class="modal-row">
+                    <label class="modal-label" for="edit-item-price">价格 (£):</label>
+                    <input type="number" id="edit-item-price" step="0.01" class="modal-input">
+                </div>
+
+                <!-- 描述 -->
+                <div class="modal-row">
+                    <label class="modal-label" for="edit-item-description">描述:</label>
+                    <textarea id="edit-item-description" class="modal-textarea"></textarea>
+                </div>
+
+                <!-- 商品类别 -->
+                <div class="modal-row">
+                    <label class="modal-label" for="edit-item-category">类别:</label>
+                    <select id="edit-item-category" class="modal-select">
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 商品图片 -->
+                <div class="modal-row">
+                    <label class="modal-label">商品图片:</label>
+                    <div class="image-upload-container">
+                        <img id="preview-item-image" src="" class="preview-image">
+                        <label class="upload-btn">
+                            选择文件
+                            <input type="file" id="edit-item-image" class="modal-input-file" accept="image/*">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 按钮 -->
+                <div class="modal-buttons">
+                    <button type="button" class="save-btn" onclick="saveItemEdit()">保存</button>
+                    <button type="button" class="cancel-btn" onclick="closeEditItemModal()">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 管理界面 -->
+        <div id="management" class="content tab-content" style="display: none;">
+            <!-- 评论展示区 -->
+            <div id="review" class="review-container">
+                <h2>用户评论</h2>
+                <div id="review-list">
+                    <p>加载中...</p> <!-- 默认显示 -->
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <script>
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-
-            document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
-            document.getElementById(tab).classList.add('active');
-        }
-
-        function updateOrderStatus(orderId, newStatus) {
-            fetch(`/merchant/orders/update/${orderId}/`, {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}",
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: `status=${encodeURIComponent(newStatus)}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // 获取订单元素
-                    const orderElement = document.getElementById(`order-${orderId}`);
-                    if (orderElement) {
-                        orderElement.remove(); // 直接移除该订单
-                    }
-                } else {
-                    alert("订单更新失败: " + data.error);
-                }
-            })
-            .catch(error => console.error("请求失败:", error));
-        }
-    </script>
+<script src="{% static 'js/merchant.js' %}"></script>
 
 </body>
 </html>

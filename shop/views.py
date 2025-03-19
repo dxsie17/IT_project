@@ -1,3 +1,7 @@
+import json
+from decimal import Decimal
+
+from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -8,7 +12,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.contrib import messages
-
+from django.views.decorators.csrf import csrf_exempt
 """
 用户端
 """
@@ -18,13 +22,10 @@ from django.contrib import messages
 def product_list(request):
 	return render(request, "home.html")
 
-
 from django.contrib.auth import authenticate, login as auth_login
 from django.shortcuts import render, redirect
 from shop.models import UserProfile
 from django.contrib.auth.models import User
-
-
 
 def user_login(request):
     if request.method == "POST":
@@ -106,9 +107,23 @@ def users_takeorder(request):
 
 
 @login_required
-def item_detail(request, item_id):
-	item = get_object_or_404(Item, id=item_id)
-	return render(request, "user/item_detail.html", {'item': item})
+def item_details(request, item_id):
+    """获取商品详细信息"""
+    try:
+        item = Item.objects.get(id=item_id, merchant=request.user.userprofile)
+        categories = Category.objects.all().values("id", "name")
+
+        return JsonResponse({
+            "id": item.id,
+            "name": item.name,
+            "price": str(item.price),
+            "description": item.description,
+            "image": item.image.url if item.image else None,
+            "category": item.category.id if item.category else None,
+            "categories": list(categories)
+        })
+    except Item.DoesNotExist:
+        return JsonResponse({"error": "商品不存在"}, status=404)
 
 
 @login_required
@@ -239,28 +254,68 @@ def merchant_dashboard(request):
 
 @login_required
 def manage_items(request):
-    """商家管理商品"""
+    """商家管理商品（返回 JSON 数据）"""
     merchant_profile = request.user.userprofile
-    items = Item.objects.filter(merchant=merchant_profile)
-    categories = Category.objects.all()
-    return render(request, "merchant/item_catalog.html", {"items": items, "categories": categories})
+    category_id = request.GET.get("category_id")
 
+    if category_id:
+        items = Item.objects.filter(merchant=merchant_profile, category_id=category_id)
+    else:
+        items = Item.objects.filter(merchant=merchant_profile)
+
+    items_data = [
+        {
+            "id": item.id,
+            "name": item.name,
+            "price": str(item.price),
+            "image": item.image.url if item.image else None,
+            "is_available": item.is_available,
+            "category": item.category.name if item.category else "未分类",
+        }
+        for item in items
+    ]
+
+    return JsonResponse({"items": items_data})
+
+@login_required
+def get_categories(request):
+    """返回当前商家有商品的类别"""
+    if not request.user.userprofile.is_merchant:
+        return JsonResponse({'error': '无权限访问'}, status=403)
+
+    merchant_profile = request.user.userprofile
+    # 仅返回当前商家有商品的类别
+    categories = Category.objects.all().values("id", "name").distinct()
+    # 检查是否返回正确的类别
+    print(f"商家 {merchant_profile.store_name} 的类别: {list(categories)}")
+
+    return JsonResponse({'categories': list(categories)})
 
 """添加商品类别"""
 
-
 @login_required
 def add_category(request):
-	if request.method == "POST":
-		name = request.POST.get("category_name")
-		is_addon = request.POST.get("is_addon") == "yes"
-		Category.objects.create(name=name, is_addon=is_addon)
-		return redirect("merchant/manage_items")
+    """商家添加新类别"""
+    if request.method == "POST":
+        category_name = request.POST.get("category_name", "").strip()
+
+        if not category_name:
+            return JsonResponse({'success': False, 'error': '类别名称不能为空'}, status=400)
+
+        # 避免重复类别
+        if Category.objects.filter(name=category_name).exists():
+            return JsonResponse({'success': False, 'error': '该类别已存在'}, status=400)
+
+        try:
+            new_category = Category.objects.create(name=category_name)
+            return JsonResponse({'success': True, 'message': '类别添加成功', 'category': {'id': new_category.id, 'name': new_category.name}})
+        except IntegrityError:
+            return JsonResponse({'success': False, 'error': '数据库错误，请重试'}, status=500)
+
+    return JsonResponse({'error': '仅支持 POST 请求'}, status=405)
 
 
 """商家添加、编辑商品"""
-
-
 @login_required
 def add_item(request):
     """商家添加新商品"""
@@ -289,6 +344,16 @@ def add_item(request):
 
     return render(request, "merchant/add_item.html", {"categories": categories})
 
+@login_required
+def toggle_item_availability(request, item_id):
+    """上架/下架商品"""
+    item = get_object_or_404(Item, id=item_id, merchant=request.user.userprofile)
+
+    # 取反商品状态
+    item.is_available = not item.is_available
+    item.save()
+
+    return JsonResponse({"success": True, "new_status": item.is_available})
 
 @login_required
 def edit_item(request, item_id):
@@ -329,6 +394,54 @@ def delete_item(request, item_id):
 
     item.delete()
     return JsonResponse({'success': True, 'message': '商品已成功删除'})
+
+
+@login_required
+def update_item(request, item_id):
+    """更新商品信息，包括上传图片"""
+    if request.method == "POST":
+        try:
+            name = request.POST.get("name")
+            price = request.POST.get("price")
+            description = request.POST.get("description", "")
+            category_id = request.POST.get("category")
+            image = request.FILES.get("image")  # 获取上传的图片
+
+            if not name or not price:
+                return JsonResponse({"success": False, "error": "商品名称和价格不能为空！"}, status=400)
+
+            # **判断是更新还是创建**
+            if item_id == "new":
+                item = Item(
+                    name=name,
+                    price=Decimal(price),
+                    description=description,
+                    merchant=request.user.userprofile,  # **确保商品属于当前商家**
+                )
+                message = "商品已创建！"
+            else:
+                item = get_object_or_404(Item, id=item_id, merchant=request.user.userprofile)
+                item.name = name
+                item.price = Decimal(price)
+                item.description = description
+                message = "商品信息已更新！"
+
+            # **更新分类**
+            if category_id:
+                item.category = get_object_or_404(Category, id=category_id)
+
+            # **更新图片（如果用户上传了新图片）**
+            if image:
+                item.image = image
+
+            item.save()
+
+            return JsonResponse({"success": True, "message": message, "item_id": item.id})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+    return JsonResponse({"success": False, "error": "无效请求"}, status=400)
 
 """商家管理订单"""
 
@@ -383,3 +496,18 @@ def update_order_status(request, order_id):
         return JsonResponse({'error': '无效的订单状态'}, status=400)
 
     return JsonResponse({'error': '请求错误'}, status=400)
+
+def get_reviews(request):
+    reviews = Review.objects.all().order_by('-created_at')  # 按创建时间倒序排序
+    review_list = [
+        {
+            "username": review.user.username if review.user else "匿名用户",
+            "item": review.item.name if review.item else None,
+            "order": review.order.order_number if review.order else None,
+            "rating": review.rating,
+            "comment": review.comment,
+            "timestamp": review.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        for review in reviews
+    ]
+    return JsonResponse({"reviews": review_list})

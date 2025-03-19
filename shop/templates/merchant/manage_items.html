@@ -111,3 +111,223 @@
 
 </body>
 </html>
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>商家后台 - {{ store_name }}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/merchant_dashboard.css' %}">
+</head>
+<body>
+
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+        <div class="store-info">{{ store_name }}</div>  <!-- 商家信息（左上角） -->
+        <div class="nav-links">
+            <a href="javascript:void(0);" class="tab active" onclick="switchTab('orders')">Orders</a>
+            <a href="javascript:void(0);" class="tab" onclick="switchTab('items')">Item Catalog</a>
+            <a href="javascript:void(0);" class="tab" onclick="switchTab('management')">Management</a>
+        </div>
+        <a href="{% url 'logout' %}" class="logout">登出</a>
+    </div>
+
+    <div class="container">
+        <!-- 侧边栏 -->
+        <div class="sidebar" id="sidebar-content">
+            <h3>订单管理</h3>
+            <a href="?status=Ongoing" class="sidebar-tab active" onclick="setSidebarActive(this)">Ongoing</a>
+            <a href="?status=Finished" class="sidebar-tab" onclick="setSidebarActive(this)">Finished</a>
+            <a href="?status=Canceled" class="sidebar-tab" onclick="setSidebarActive(this)">Canceled</a>
+        </div>
+
+        <!-- 订单管理 -->
+        <div id="orders" class="content tab-content active">
+            {% if orders %}
+                {% for order in orders %}
+                <div class="order" id="order-{{ order.id }}">
+                    <div class="order-header">No. {{ order.order_number }}</div>
+                    {% for order_item in order.order_items.all %}
+                    <div class="order-item">
+                        <img src="{% if order_item.item.image %}{{ order_item.item.image.url }}{% else %}{% static 'img/1.jpeg' %}{% endif %}" alt="{{ order_item.item.name }}">
+                        <div><strong>{{ order_item.item.name }}</strong></div>
+                        <div style="margin-left: auto; text-align: right;">
+                            <p>£{{ order_item.item.price }} x {{ order_item.quantity }} = £{{ order_item.item.price|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <p style="text-align: right;"><strong>总价: £{{ order.total_price|floatformat:2 }}</strong></p>
+
+                    {% if order.status == "Ongoing" %}
+                    <div class="order-actions">
+                        <button class="btn finish" onclick="updateOrderStatus({{ order.id }}, 'Finished')">完成</button>
+                        <button class="btn cancel" onclick="updateOrderStatus({{ order.id }}, 'Canceled')">取消</button>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>暂无订单</p>
+            {% endif %}
+        </div>
+
+        <!-- 商品管理 -->
+        <div id="items" class="content tab-content" style="display: none;">
+            <h2>商品管理</h2>
+            <div class="product-container">
+                {% for item in items %}
+                <div class="product" data-category="{{ item.category.id }}">
+                    <img src="{% if item.image %}{{ item.image.url }}{% else %}{% static 'img/1.jpeg' %}{% endif %}" alt="{{ item.name }}">
+                    <p>{{ item.name }}</p>
+                    <p>¥{{ item.price }}</p>
+                    <button onclick="window.location.href='{% url 'edit_item' item.id %}'">编辑</button>
+                    <button class="btn cancel" onclick="deleteItem({{ item.id }})">删除</button>
+                </div>
+                {% empty %}
+                <p>暂无商品</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 商家管理 -->
+        <div id="management" class="content tab-content" style="display: none;">
+            <h2>商家管理</h2>
+            <div id="review-container"></div>
+        </div>
+    </div>
+
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get("tab") || "orders";
+    const status = urlParams.get("status") || "Ongoing";
+    const category = urlParams.get("category") || null;
+
+    switchTab(tab, false); // 初始化时不修改 URL
+    if (tab === "orders") {
+        loadOrders(status);
+    } else if (tab === "items" && category) {
+        loadProducts(category);
+    }
+});
+
+function switchTab(tab, updateURL = true) {
+    document.querySelectorAll(".tab").forEach((el) => el.classList.remove("active"));
+    document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add("active");
+
+    document.querySelectorAll(".tab-content").forEach((el) => (el.style.display = "none"));
+    document.getElementById(tab).style.display = "block";
+
+    updateSidebar(tab);
+
+    if (updateURL) {
+        const url = new URL(window.location);
+        url.searchParams.set("tab", tab);
+        window.history.pushState({}, "", url);
+    }
+}
+
+function updateSidebar(tab) {
+    const sidebar = document.getElementById("sidebar-content");
+    sidebar.innerHTML = ""; // 避免重复渲染侧边栏
+
+    if (tab === "orders") {
+        sidebar.innerHTML = `
+            <h3>订单管理</h3>
+            <a href="javascript:void(0);" class="sidebar-tab" id="tab-Ongoing" onclick="setSidebarActive(event, 'Ongoing'); loadOrders('Ongoing');">Ongoing</a>
+            <a href="javascript:void(0);" class="sidebar-tab" id="tab-Finished" onclick="setSidebarActive(event, 'Finished'); loadOrders('Finished');">Finished</a>
+            <a href="javascript:void(0);" class="sidebar-tab" id="tab-Canceled" onclick="setSidebarActive(event, 'Canceled'); loadOrders('Canceled');">Canceled</a>
+        `;
+        loadOrders("Ongoing");
+    } else if (tab === "items") {
+        fetch("/merchant/categories/")
+            .then(response => response.json())
+            .then(data => {
+                sidebar.innerHTML = "<h3>商品类别</h3>";
+                data.categories.forEach(category => {
+                    const categoryLink = document.createElement("a");
+                    categoryLink.href = "javascript:void(0);";
+                    categoryLink.textContent = category.name;
+                    categoryLink.classList.add("sidebar-tab");
+                    categoryLink.id = `tab-${category.id}`;
+                    categoryLink.onclick = (event) => {
+                        setSidebarActive(event, category.id);
+                        loadProducts(category.id);
+                    };
+                    sidebar.appendChild(categoryLink);
+                });
+            })
+            .catch(error => console.error("加载类别失败:", error));
+    } else if (tab === "management") {
+        fetch("/merchant/reviews/")
+            .then(response => response.json())
+            .then(data => {
+                sidebar.innerHTML = "<h3>商品评价</h3>";
+                data.reviews.forEach(review => {
+                    const reviewItem = document.createElement("p");
+                    reviewItem.textContent = `${review.item_name}: ${review.rating} ⭐ - ${review.comment}`;
+                    sidebar.appendChild(reviewItem);
+                });
+            })
+            .catch(error => console.error("加载评价失败:", error));
+    }
+}
+
+function setSidebarActive(event, value) {
+    document.querySelectorAll(".sidebar-tab").forEach((el) => el.classList.remove("active"));
+    document.getElementById(`tab-${value}`).classList.add("active");
+
+    const url = new URL(window.location);
+    if (document.getElementById("orders").style.display === "block") {
+        url.searchParams.set("status", value);
+        loadOrders(value);
+    } else if (document.getElementById("items").style.display === "block") {
+        url.searchParams.set("category", value);
+        loadProducts(value);
+    }
+    window.history.pushState({}, "", url);
+}
+
+function loadOrders(status) {
+    fetch(`/merchant/orders/?status=${status}`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("orders-container").innerHTML = html;
+        })
+        .catch(error => console.error("加载订单失败:", error));
+}
+
+function loadProducts(categoryId) {
+    fetch(`/merchant/products/?category=${categoryId}`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("product-list").innerHTML = html;
+        })
+        .catch(error => console.error("加载商品失败:", error));
+}
+
+function updateOrderStatus(orderId, newStatus) {
+    fetch(`/merchant/orders/update/${orderId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `status=${encodeURIComponent(newStatus)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`order-${orderId}`).remove();
+            loadOrders(newStatus);
+        } else {
+            alert("订单更新失败: " + data.error);
+        }
+    })
+    .catch(error => console.error("请求失败:", error));
+}
+    </script>
+
+</body>
+</html>

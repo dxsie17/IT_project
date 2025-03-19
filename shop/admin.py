@@ -11,9 +11,9 @@ class UserProfileAdmin(admin.ModelAdmin):
 # 商品类别管理
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'is_addon')
+    list_display = ('name',)
     search_fields = ('name',)
-    list_filter = ('is_addon',)
+    list_filter = ()
 
 # 商品管理
 @admin.register(Item)

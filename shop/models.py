@@ -19,7 +19,6 @@ class UserProfile(models.Model):
 # 商品类别
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    is_addon = models.BooleanField(default=False)  # 是否是小料类别
 
     def __str__(self):
         return self.name
@@ -65,10 +64,10 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)  # 订单更新时间
 
     def save(self, *args, **kwargs):
-        """ 先保存订单，再计算总价，防止主键未创建 """
-        super().save(*args, **kwargs)  # 先保存订单，确保有主键 ID
-        self.total_price = sum(item.get_total_price() for item in self.order_items.all())  # 计算总价
-        super().save(update_fields=["total_price"])  # 仅更新 total_price，避免无限递归
+        """ 计算订单总价 """
+        super().save(*args, **kwargs)  # 先保存订单，确保有 ID
+        self.total_price = sum(item.get_total_price() for item in self.order_items.all())
+        super().save(update_fields=["total_price"])
 
     def __str__(self):
         return f"Order {self.order_number} - {self.status}"
@@ -78,17 +77,13 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name="ordered_items")  # 增加 related_name
     quantity = models.PositiveIntegerField(default=1)
-    addon_items = models.ManyToManyField(Item, blank=True, related_name="addon_for")  # 允许添加小料
 
     def get_total_price(self):
-        """ 计算当前商品在订单中的总价，包括小料 """
-        base_price = self.item.price * self.quantity
-        addons_price = sum(addon.price for addon in self.addon_items.all()) * self.quantity
-        return base_price + addons_price
+        """计算当前商品在订单中的总价"""
+        return self.item.price * self.quantity
 
     def __str__(self):
-        addons = ", ".join([addon.name for addon in self.addon_items.all()])
-        return f"{self.item.name} x {self.quantity} (+ {addons})"
+        return f"{self.item.name} x {self.quantity}"
 
 # 评分与评论
 class Review(models.Model):

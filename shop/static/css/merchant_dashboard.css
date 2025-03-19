@@ -177,3 +177,341 @@ body {
 .tab-content.active {
     display: block;
 }
+/* 🛒 商品列表容器 */
+#item-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;  /* 商品之间的间距 */
+    justify-content: flex-start;  /* 让商品从左到右排列 */
+    padding: 10px;
+}
+
+/* 默认商品卡片样式 */
+.item-card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 220px; /* 调整大小 */
+    display: inline-block;
+    margin: 15px;
+    transition: background 0.3s;
+}
+
+/* 📷 商品图片 */
+.item-card img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+/* 🏷️ 商品信息 */
+.item-info h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.item-info p {
+    font-size: 14px;
+    color: #666;
+    margin: 4px 0;
+}
+
+/* ✅ 上架/下架按钮 */
+.toggle-availability-btn {
+    width: 80px;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background 0.2s ease-in-out;
+}
+
+/* 🔴 下架按钮样式 */
+.toggle-availability-btn.delist {
+    background: #e74c3c;  /* 红色 */
+    color: white;
+}
+
+/* 🟢 上架按钮样式 */
+.toggle-availability-btn.list {
+    background: #5a7f4f;
+    color: white;
+}
+
+/* ✏️ 编辑 & 删除按钮 */
+.edit-btn, .delete-btn {
+    margin-top: 5px;
+    padding: 6px 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 5px;
+    transition: background 0.2s;
+}
+
+.edit-btn {
+    background: #3498db;  /* 蓝色 */
+    color: white;
+}
+
+.delete-btn {
+    background: #e74c3c;  /* 红色 */
+    color: white;
+}
+
+/* ➕ 新增商品按钮 */
+.add-item-card {
+    width: 180px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+    border: 2px dashed #ccc;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 8px;
+}
+
+.add-item-card:hover {
+    background-color: #e0e0e0;
+}
+
+.add-item-icon {
+    font-size: 50px;
+    color: #666;
+}
+
+/* 📌 商品编辑弹窗整体 */
+#edit-item-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4); /* 半透明背景 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* 📌 弹窗内容 */
+.modal-content {
+    background: white;
+    width: 500px; /* 控制宽度 */
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* ❌ 关闭按钮 */
+.modal-content .close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 22px;
+    cursor: pointer;
+    color: #aaa;
+    transition: color 0.3s;
+}
+
+.modal-content .close:hover {
+    color: #e74c3c;
+}
+
+/* 📌 标题 */
+.modal-content h2 {
+    margin-bottom: 15px;
+    font-size: 22px;
+    color: #333;
+    text-align: center;
+}
+
+/* 📌 表单行（让标题和输入框横向对齐） */
+.modal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+/* 📌 标签左对齐 */
+.modal-label {
+    width: 30%;
+    font-size: 14px;
+    color: #333;
+    font-weight: bold;
+}
+
+/* 📌 输入框样式 */
+.modal-input, .modal-textarea, .modal-select {
+    width: 65%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.modal-textarea {
+    height: 60px;
+    resize: none;
+}
+
+/* 📷 商品图片预览 */
+.preview-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    display: inline-block;
+}
+
+/* 📷 图片上传按钮 */
+#edit-item-image {
+    display: none;
+}
+
+.upload-btn {
+    display: inline-block;
+    background: #3498db;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.upload-btn:hover {
+    background: #2980b9;
+}
+
+/* 📌 按钮 */
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.modal-buttons button {
+    flex: 1;
+    margin: 0 5px;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.3s;
+}
+
+/* ✅ 保存按钮 */
+.save-btn {
+    background: #5a7f4f;
+    color: white;
+}
+
+.save-btn:hover {
+    background: #4e6b43;
+}
+
+/* ❌ 取消按钮 */
+.cancel-btn {
+    background: #e74c3c;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #c0392b;
+}
+
+/* 评论区域整体样式 */
+.review-container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 评论标题 */
+.review-container h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+}
+
+/* 单个评论的卡片样式 */
+.review-card {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out;
+}
+
+.review-card:hover {
+    transform: translateY(-2px);
+}
+
+/* 用户名 & 时间 */
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.review-header strong {
+    color: #333;
+}
+
+/* 评论内容 */
+.review-content {
+    font-size: 16px;
+    color: #444;
+    line-height: 1.5;
+}
+
+/* 评分样式 */
+.review-rating {
+    color: #FFD700;  /* 金色星星 */
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* 针对不同评分的颜色 */
+.review-rating[data-rating="5"] {
+    color: #28a745; /* 绿色 */
+}
+.review-rating[data-rating="4"] {
+    color: #17a2b8; /* 蓝色 */
+}
+.review-rating[data-rating="3"] {
+    color: #ffc107; /* 黄色 */
+}
+.review-rating[data-rating="2"],
+.review-rating[data-rating="1"] {
+    color: #dc3545; /* 红色 */
+}
