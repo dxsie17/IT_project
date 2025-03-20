@@ -31,13 +31,17 @@ SECRET_KEY = "django-insecure-gu8$x)j^l^os+d4)u@&d4zgz70kz3in3^1@y@48$2wmt4ybgm7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-if not DEBUG:
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+if os.getenv("RENDER"):
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "6cf13i6ohbfBdrA_01KLFZOtvuyritJBINDh8osHPt57QOv71waTkymyhx6dDBbAbGQ")
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = ["127.0.0.1",
                  "localhost",
                  "testserver",
-                 os.getenv("RENDER_EXTERNAL_HOSTNAME", "https://it-project-65ic.onrender.com")]
+                '0.0.0.0',
+                 os.getenv("RENDER_EXTERNAL_HOSTNAME", "it-project-65ic.onrender.com")]
 LOGIN_URL = "/login/"
 
 
@@ -56,16 +60,19 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-]
 
-CSRF_COOKIE_SECURE = False  # 禁用 HTTPS 限制，开发环境必须设置为 False
-CSRF_USE_SESSIONS = False  # 使用 Session 存储 CSRF 令牌
+]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# CSRF_COOKIE_SECURE = False  # 禁用 HTTPS 限制，开发环境必须设置为 False
+# CSRF_USE_SESSIONS = False  # 使用 Session 存储 CSRF 令牌
 
 ROOT_URLCONF = "it_project.urls"
 
@@ -91,12 +98,23 @@ WSGI_APPLICATION = "it_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default=os.getenv("DATABASE_URL"),
-        conn_max_age=600,
-    )
-}
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://it_postgresql_sf71_user:QYhTHsPoPi4zpvE8liPiLD0R03s9uKAR@dpg-cvdvf49c1ekc73eal6j0-a.frankfurt-postgres.render.com/it_postgresql_sf71")
+
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "my_local_db",
+            "USER": "my_local_user",
+            "PASSWORD": "123456",
+            "HOST": "localhost",
+            "PORT": "5432",
+        }
+    }
 
 
 # Password validation
@@ -141,3 +159,7 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+    CSRF_COOKIE_SECURE = False
