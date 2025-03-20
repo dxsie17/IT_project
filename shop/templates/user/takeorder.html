@@ -1,286 +1,79 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Take Order - FEEL</title>
-    <style>
-      /* 主容器 */
-      .order-container {
-        display: flex;
-        min-height: 100vh;
-        font-family: Arial, sans-serif;
-      }
-      
-      /* 左侧导航栏 */
-      .sidebar {
-        width: 200px;
-        background: #f8f9fa;
-        padding: 20px;
-        border-right: 1px solid #ddd;
-      }
-      
-      .nav-title {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 15px;
-        color: #333;
-      }
-      
-      .nav-item {
-        padding: 10px;
-        cursor: pointer;
-        transition: background 0.3s;
-        border-radius: 4px;
-        margin-bottom: 5px;
-      }
-      
-      .nav-item:hover {
-        background: #e9ecef;
-      }
-      
-      .nav-item.active {
-        background: #007bff;
-        color: white;
-      }
-      
-      /* 右侧内容区 */
-      .content {
-        flex: 1;
-        padding: 20px;
-        background: white;
-      }
-      
-      /* 商品网格布局 */
-      .item-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 20px;
-      }
-      
-      .item-card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 15px;
-        transition: transform 0.3s;
-        text-decoration: none;
-        color: inherit;
-      }
-      
-      .item-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      }
-      
-      .item-image {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-        border-radius: 4px;
-        margin-bottom: 10px;
-      }
-      
-      .item-price {
-        color: #e74c3c;
-        font-weight: bold;
-        font-size: 1.1em;
-      }
-      
-      /* 购物车样式 */
-      .cart-sidebar {
-        position: fixed;
-        right: 0;
-        top: 0;
-        width: 300px;
-        height: 100vh;
-        background: white;
-        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        overflow-y: auto;
-      }
-      
-      .cart-item {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-      }
-      
-      /* 购物车样式 */
-      .cart-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px;
-        border-bottom: 1px solid #eee;
-        margin-bottom: 8px;
-      }
-      
-      .item-info {
-        flex: 2;
-      }
-      
-      .quantity-control {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 6px;
-      }
-      
-      .btn-quantity {
-        padding: 4px 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background: white;
-        cursor: pointer;
-      }
-      
-      .btn-remove {
-        padding: 6px 12px;
-        background: #dc3545;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-left: 10px;
-      }
-      
-      .price {
-        color: #e74c3c;
-        font-weight: bold;
-      }
-      
-      .empty-cart {
-        color: #666;
-        text-align: center;
-        padding: 20px;
-      }
-    </style>
+    <title>Take Order</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/user.css' %}?v=3">
   </head>
   <body>
-    <div class="order-container">
+    <button class="logout-btn" onclick="window.location.href='/logout/'">🚪 Logout</button>
+<!-- 商家标题 -->
+    <div class="store-header">Welcome to {{ merchant.store_name }}</div>
+
+    <div class="main-container">
       <!-- 左侧导航 -->
       <div class="sidebar">
         <div class="nav-title">Categories</div>
         {% for category in categories %}
-          <div class="nav-item {% if category.name == selected_category %}active{% endif %}" onclick="window.location.href='?category={{ category.name }}'">{{ category.name }}</div>
+          <div class="nav-item {% if category.name == selected_category %}active{% endif %}"
+               onclick="window.location.href='?category={{ category.name }}'">
+            {{ category.name }}
+          </div>
         {% endfor %}
       </div>
 
-      <!-- 右侧内容 -->
+      <!-- 中间商品列表 -->
       <div class="content">
-        <div id="product-detail" style="display: none;"></div>
-        <div class="item-grid" id="product-list">
+        <div class="item-grid">
           {% for item in items %}
             <div class="item-card" onclick="loadItemDetail({{ item.id }})">
-              {% if item.image %}
-                <img src="{{ item.image.url }}" alt="{{ item.name }}" class="item-image" />
-              {% endif %}
-              <h3>{{ item.name }}</h3>
-              <p class="item-price">¥{{ item.price }}</p>
-              <small>{{ item.category.name }}</small>
+                {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.name }}" class="item-image" />
+                {% endif %}
+                <h3 class="item-name">{{ item.name }}</h3>
+                <p class="item-price">£{{ item.price }}</p>
+                <button class="btn-success" onclick="event.stopPropagation(); addToBasket({{ item.id }})">
+                    加入购物车
+                </button>
             </div>
           {% empty %}
-            <p>There are no products in the current category.</p>
+            <p>There are no products available.</p>
           {% endfor %}
         </div>
       </div>
 
-      <!-- 新增购物车 -->
+      <!-- 购物车 -->
       <div class="cart-sidebar">
         <h3>🛒 购物车</h3>
         <div id="cart-items">
           <!-- 购物车内容动态加载 -->
         </div>
-        <button onclick="checkout()" style="margin-top: 20px; width: 100%;">结算</button>
+          <p id="cart-total-price" style="text-align: right; font-weight: bold; font-size: 18px; margin-top: 10px;">
+        总价: £0.00
+          </p>
+        <button class="checkout-btn" onclick="checkout()">Checkout</button>
+           <!-- 新增查看所有订单 111-->
+        <button onclick="window.location.href='/my_orders/'" style="margin-top: 10px; width: 100%;">View All Orders</button>
       </div>
     </div>
-    <script>
-      // 加载商品详情
-      function loadItemDetail(itemId) {
-        fetch(`/item/${itemId}/`)
-          .then((response) => response.text())
-          .then((html) => {
-            document.getElementById('product-detail').innerHTML = html
-            document.getElementById('product-list').style.display = 'none'
-            document.getElementById('product-detail').style.display = 'block'
-          })
-      }
-      
-      // 返回商品列表
-      function goBackToList() {
-        document.getElementById('product-list').style.display = 'grid'
-        document.getElementById('product-detail').style.display = 'none'
-      }
-      
-      // 添加到购物车
-      function addToBasket(itemId) {
-        fetch(`/add-to-basket/${itemId}/`, {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': '{{ csrf_token }}'
-          }
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              updateCartDisplay()
-            }
-          })
-      }
-      
-      // 更新购物车显示
-      // 更新购物车显示
-      function updateCartDisplay() {
-        fetch('/get-cart/')
-          .then(response => response.json())
-          .then(data => {
-            const cartHtml = data.items.map(item => `
-                <div class="cart-item" data-item-id="${item.id}">
-                    <div class="item-info">
-                        <span class="item-name">${item.name}</span>
-                        <div class="quantity-control">
-                            <button class="btn-quantity" onclick="decreaseQuantity(${item.id})">-</button>
-                            <span class="quantity">${item.quantity}</span>
-                            <button class="btn-quantity" onclick="addToBasket(${item.id})">+</button>
-                        </div>
-                    </div>
-                    <div class="item-actions">
-                        <span class="price">¥${item.total_price}</span>
-                        <button class="btn-remove" onclick="removeItem(${item.id})">移除</button>
-                    </div>
+
+    <!-- 商品详情弹窗 -->
+    <div id="product-detail" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeItemDetail()">&times;</span>
+            <div id="product-detail-content">
+                <img id="detail-image" class="detail-image" src="" alt="商品图片" style="width: 100%; max-height: 300px; object-fit: cover; display: none;"/>
+                <h1 id="detail-name"></h1>
+                <p class="price">Price: £<span id="detail-price"></span></p>
+                <div class="description">
+                    <h3>Product Description</h3>
+                    <p id="detail-description"></p>
                 </div>
-            `).join('');
-            
-            document.getElementById('cart-items').innerHTML = data.items.length ? 
-                cartHtml : '<p class="empty-cart">购物车为空</p>';
-          });
-        }
+                <button id="detail-add-cart" class="btn-success">加入购物车</button>
+            </div>
+        </div>
+    </div>
 
-      // 减少数量
-      function decreaseQuantity(itemId) {
-        fetch(`/decrease-from-basket/${itemId}/`, {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json'
-          }
-        })
-        .then(response => response.json())
-        .then(data => data.success && updateCartDisplay());
-      }
-
-      // 完全移除
-      function removeItem(itemId) {
-        fetch(`/remove-from-basket/${itemId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => data.success && updateCartDisplay());
-      }
-    </script>
+  <script src="{% static 'js/user.js' %}"></script>
   </body>
 </html>

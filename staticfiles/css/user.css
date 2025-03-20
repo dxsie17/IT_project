@@ -1,0 +1,264 @@
+/* 🌍 全局样式 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+}
+
+/* 📌 顶部导航栏 */
+.navbar {
+    background: #5a7f4f;  /* 绿色背景 */
+    padding: 15px 20px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* 让导航栏内容居中 */
+    position: relative;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* 📌 商家名称（左上角） */
+.store-info {
+    position: absolute;
+    left: 20px;
+    font-weight: bold;
+}
+
+/* 📌 右上角登出按钮 */
+.logout {
+    position: absolute;
+    right: 20px;
+    background: red;
+    padding: 6px 12px;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+/* 🏠 主容器布局 */
+.main-container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* 📌 侧边栏 */
+.sidebar {
+    width: 220px;
+    background: #5a7f4f;
+    color: white;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 📌 侧边栏分类导航 */
+.nav-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* 📌 分类按钮 */
+.nav-item {
+    padding: 12px;
+    text-align: center;
+    background: #4b6b3c;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    width: 100%;
+    transition: background 0.3s;
+}
+
+.nav-item:hover {
+    background: #3f5931;
+}
+
+.nav-item.active {
+    background: #37492f;
+    font-weight: bold;
+}
+
+/* 🏷️ 右侧主要内容 */
+.content {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+/* 🛍️ 商品列表 */
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    justify-items: center;
+}
+
+/* 📦 商品卡片 */
+.item-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 220px;
+    transition: transform 0.3s;
+    cursor: pointer;
+}
+
+.item-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 📷 商品图片 */
+.item-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+/* 📌 商品信息 */
+.item-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.item-price {
+    color: #e74c3c;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-top: 5px;
+}
+
+/* 🛒 购物车 */
+.cart-sidebar {
+    position: fixed;
+    right: 0;
+    top: 70px;
+    width: 320px;
+    height: calc(100vh - 70px);
+    background: white;
+    box-shadow: -3px 0 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.cart-sidebar h3 {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+}
+
+.cart-item .btn-remove {
+    background: red;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* ✅ 购物车结算按钮 */
+.checkout-btn {
+    width: 100%;
+    padding: 12px;
+    background: #5a7f4f;
+    color: white;
+    font-size: 18px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.checkout-btn:hover {
+    background: #4b6b3c;
+}
+
+/* 📦 订单列表 */
+.order-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 📦 订单卡片 */
+.order-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 🏷️ 订单信息 */
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* 🛍️ 订单商品列表 */
+.order-items {
+    margin-top: 10px;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* 🎯 按钮样式 */
+button, .btn {
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+/* ✅ 绿色按钮 */
+.btn-success {
+    background: #5a7f4f;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #4b6b3c;
+}
+
+/* 🔴 红色按钮 */
+.btn-danger {
+    background: red;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: darkred;
+}

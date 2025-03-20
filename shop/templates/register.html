@@ -67,6 +67,19 @@
             color: #5A7742;
             font-weight: bold;
         }
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
@@ -75,6 +88,13 @@
         <div class="profile-icon"></div>
         <form method="POST" action="{% url 'register' %}">
             {% csrf_token %}
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+                </div>
+            {% endif %}
             <input type="email" name="email" placeholder="Email" required>
             <input type="tel" name="phone" placeholder="Tel" required>
             <input type="password" name="password1" placeholder="Password" required>
@@ -82,14 +102,43 @@
 
             <!-- 添加商家注册选项 -->
             <label>
-                <input type="checkbox" name="is_merchant"> 注册为商家
+                <input type="checkbox" name="is_merchant"> Register as a merchant
             </label>
+
+            <!-- 添加商家店铺名输入（仅在勾选时显示） -->
+            <div id="store-name-field" style="display: none;">
+                <input type="text" name="store_name" placeholder="Store Name">
+            </div>
 
             <button type="submit" class="btn">Register</button>
         </form>
         <div class="link">
             <a href="{% url 'login' %}">Login</a>
         </div>
+
     </div>
+    <script>
+        document.querySelector('input[name="is_merchant"]').addEventListener('change', function() {
+            const isMerchantCheckbox = document.querySelector('input[name="is_merchant"]');
+            const storeNameField = document.getElementById('store-name-field');
+            const storeNameInput = document.querySelector('input[name="store_name"]');
+            function toggleStoreNameField() {
+            if (isMerchantCheckbox.checked) {
+                storeNameField.style.display = "block";
+                storeNameInput.setAttribute("required", "true");
+            } else {
+                storeNameField.style.display = "none";
+                storeNameInput.removeAttribute("required");  // 移除 required
+                storeNameInput.value = "";  // 避免提交空值
+            }
+        }
+
+        // 监听 checkbox 变化
+        isMerchantCheckbox.addEventListener("change", toggleStoreNameField);
+
+        // 页面加载时确保状态同步
+        toggleStoreNameField();
+        });
+    </script>
 </body>
 </html>

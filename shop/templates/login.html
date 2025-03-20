@@ -103,7 +103,7 @@ document.getElementById("login-form").addEventListener("submit", function(event)
     let csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
     let errorMessage = document.getElementById("error-message");
 
-    fetch("{% url 'login' %}", {
+    fetch("{% url 'user_login' %}", {
         method: "POST",
         body: formData,
         headers: {
@@ -121,7 +121,7 @@ document.getElementById("login-form").addEventListener("submit", function(event)
     })
     .catch(error => {
         console.error("Error:", error);
-        errorMessage.innerText = "网络错误，请稍后再试";
+        errorMessage.innerText = "请稍后再试";
         errorMessage.style.display = "block";
     });
 });

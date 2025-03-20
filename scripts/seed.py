@@ -28,12 +28,17 @@ def create_merchants():
     merchant2, _ = UserProfile.objects.get_or_create(user=user2, defaults={"is_merchant": True, "store_name": "Tea Queen"})
 
     print(f"✅ 商家账户: {merchant1.store_name}, {merchant2.store_name}\n")
+    return [merchant1, merchant2]
 
 def create_categories():
-    """ 确保类别不会重复创建 """
+    """ 确保类别不会重复创建，每个商家有自己的类别 """
+    merchants = create_merchants()  # 确保商家存在
     categories = ["奶茶", "果茶", "咖啡", "小吃"]
-    for name in categories:
-        Category.objects.get_or_create(name=name)
+
+    for merchant in merchants:
+        for name in categories:
+            Category.objects.get_or_create(name=name, merchant=merchant)
+
     print("✅ 商品类别已添加\n")
 
 def create_items():
@@ -51,7 +56,7 @@ def create_items():
     items_data = [
         {"name": "珍珠奶茶", "desc": "经典珍珠奶茶", "price": 5.99, "category": "奶茶", "merchant": merchants[0]},
         {"name": "红豆奶茶", "desc": "红豆与奶茶的完美结合", "price": 6.50, "category": "奶茶", "merchant": merchants[0]},
-        {"name": "抹茶拿铁", "desc": "抹茶加牛奶，健康美味", "price": 7.00, "category": "咖啡", "merchant": merchants[0]},
+        {"name": "抹茶拿铁", "desc": "抹茶加牛奶，健康美味", "price": 7.00, "category": "咖啡", "merchant": merchants[1]},
     ]
 
     for item in items_data:
@@ -137,8 +142,7 @@ def create_reviews():
 
 if __name__ == "__main__":
     reset_database()  # 仅清除订单和评论，不影响用户和商品
-    create_merchants()  # 确保商家存在
-    create_categories()  # 确保类别存在
+    create_categories()  # 创建商家和类别
     create_items()  # 确保商品存在
     create_orders()  # 添加新订单
     create_reviews()  # 添加评论

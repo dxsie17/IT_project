@@ -72,6 +72,30 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+function updateOrderStatus(orderId, newStatus) {
+    fetch(`/merchant/orders/update/${orderId}/`, {  // ✅ 确保和 Django URL 匹配
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",  // ✅ 传递 FormData
+            "X-CSRFToken": getCSRFToken()  // 确保 CSRF Token 存在
+        },
+        body: `status=${encodeURIComponent(newStatus)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`✅ 订单 ${orderId} 状态已更新为 ${newStatus}`);
+            location.reload(); // 刷新页面，更新订单状态
+        } else {
+            alert(`❌ 更新失败: ${data.error}`);
+        }
+    })
+    .catch(error => {
+        console.error("❌ 更新订单状态失败:", error);
+        alert("❌ 网络错误，无法更新订单状态！");
+    });
+}
+
 
 function loadCategories() {
     console.log("🚀 正在获取商品类别...");
@@ -152,7 +176,7 @@ function submitCategory() {
     fetch(`/merchant/category/add/`, {
         method: "POST",
         headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
+            "X-CSRFToken": getCSRFToken(),  // ✅ 确保 CSRF 令牌存在
             "Content-Type": "application/x-www-form-urlencoded"
         },
         body: `category_name=${encodeURIComponent(categoryName)}`

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选择商家店铺</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f8f8;
+            margin: 0;
+        }
+        .container {
+            width: 400px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-radius: 8px;
+        }
+        .header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .store-list {
+            list-style: none;
+            padding: 0;
+        }
+        .store-list li {
+            padding: 10px;
+            background: #5A7742;
+            color: white;
+            margin: 10px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .store-list li:hover {
+            background: #476132;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">请选择一个商家店铺</div>
+        <ul class="store-list">
+            {% for merchant in merchants %}
+                <li onclick="window.location.href='/users/{{ merchant.store_slug }}/'">
+                    {{ merchant.store_name }}
+                </li>
+            {% empty %}
+                <p>暂无可选店铺</p>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

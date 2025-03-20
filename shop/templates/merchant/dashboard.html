@@ -58,7 +58,7 @@
             {% if orders %}
                 {% for order in orders %}
                 <div class="order" id="order-{{ order.id }}">
-                    <div class="order-header">No. {{ order.order_number }}</div>
+                    <div class="order-header">No. {{ order.id }}</div>
                     {% for order_item in order.order_items.all %}
                     <div class="order-item">
                         <img src="{% if order_item.item.image %}{{ order_item.item.image.url }}{% else %}{% static 'img/1.jpeg' %}{% endif %}"
