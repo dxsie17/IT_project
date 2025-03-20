@@ -3,9 +3,9 @@
 <html>
 <head>
     <style>
-        /* 🌟 页面整体布局 */
+        /* Page Layout */
         body {
-            padding-top: 70px; /* 避免被固定标题遮挡 */
+            padding-top: 70px; /* Avoid being covered by the fixed header */
         }
 
         .order-container {
@@ -14,7 +14,7 @@
             padding: 20px;
         }
 
-        /* 🌟 顶部标题（固定） */
+        /* Fixed Header */
         .store-header {
             position: fixed;
             top: 0;
@@ -31,7 +31,7 @@
             z-index: 1000;
         }
 
-        /* 🌟 返回按钮（固定左上角） */
+        /* Back Button (Fixed Top Left) */
         .back-to-select-stores {
             position: fixed;
             top: 10px;
@@ -50,7 +50,7 @@
             background: #0056b3;
         }
 
-        /* 🌟 订单卡片 */
+        /*  Order Card */
         .order-card {
             border: 1px solid #ddd;
             border-radius: 8px;
@@ -67,7 +67,7 @@
             margin-bottom: 10px;
         }
 
-        /* 🌟 订单商品 */
+        /* Order Items */
         .order-items {
             display: flex;
             flex-wrap: wrap;
@@ -95,29 +95,29 @@
             border-radius: 4px;
         }
 
-        /* 进行中订单 - 橙色 */
+        /* Ongoing Orders - Orange */
         .status-ongoing {
             color: #ff9800;
         }
 
-        /* 已完成订单 - 绿色 */
+        /* Finished Orders - Green */
         .status-finished {
             color: #28a745;
         }
 
-        /* 取消的订单 - 红色 */
+        /* Canceled Orders - Red */
         .status-canceled {
             color: #dc3545;
         }
 
-        /* 🌟 订单底部 */
+        /* Order Footer */
         .order-footer {
             text-align: right;
             font-weight: bold;
             margin-top: 10px;
         }
 
-        /* 🌟 按钮样式 */
+        /* Button Styles */
         .review-btn {
             background: #ff9800;
             color: white;
@@ -137,7 +137,7 @@
             color: #777;
         }
 
-        /* 🌟 评论弹窗 */
+        /* Review Modal */
         .modal {
             display: none;
             position: fixed;
@@ -218,10 +218,10 @@
 </head>
 <body>
 
-    <!-- 🌟 固定返回按钮（左上角） -->
+    <!-- Fixed Back Button (Top Left) -->
     <button class="back-to-select-stores" onclick="window.location.href='/select-store/'">⬅ Back to Select Stores</button>
     <button class="logout-btn" onclick="window.location.href='/logout/'">🚪 Logout</button>
-    <!-- 🌟 固定标题 -->
+    <!-- Fixed Header -->
     <div class="store-header">My Orders</div>
 
     <div class="order-container">
@@ -261,7 +261,7 @@
                                 Total: £<span id="total-price-{{ order.id }}">{{ order.total_price|floatformat:2 }}</span>
                             </p>
 
-                            <!-- ✅ 只有 "Finished" 或 "Canceled" 订单才显示 Review 按钮 -->
+                            <!-- Show "Review" button only for Finished or Canceled orders -->
                             {% if order.status in "Finished,Canceled" %}
                                 <button class="review-btn" onclick="openReviewModal({{ order.id }})">
                                     Review Order
@@ -276,7 +276,7 @@
         </div>
     </div>
 
-    <!-- 🌟 评论弹窗 -->
+    <!-- Review Modal -->
     <div class="modal-overlay" id="modal-overlay"></div>
     <div class="modal" id="review-modal">
         <h2>Review Order</h2>
@@ -296,44 +296,43 @@
 
     <script>
 
-// 🌟 打开评论弹窗（修正 orderId 传递）
+// Open the review modal (Fix orderId passing)
 function openReviewModal(orderId) {
-    document.getElementById("order-id").value = orderId;  // ✅ 正确绑定 orderId
-    document.getElementById("rating").value = "";  // ✅ 清空评分
-    document.getElementById("comment").value = ""; // ✅ 清空评论
+    document.getElementById("order-id").value = orderId;  // Correctly bind orderId
+    document.getElementById("rating").value = "";  // Clear rating
+    document.getElementById("comment").value = ""; // Clear comment
     document.getElementById("review-modal").style.display = "block";
     document.getElementById("modal-overlay").style.display = "block";
 }
 
-// 🌟 关闭评论弹窗
+// Close the review modal
 function closeReviewModal() {
     document.getElementById("review-modal").style.display = "none";
     document.getElementById("modal-overlay").style.display = "none";
 }
 
-
 document.addEventListener("DOMContentLoaded", function () {
-    // 绑定提交事件
+    // Bind the submit event
     document.getElementById("review-form").addEventListener("submit", function (event) {
         event.preventDefault();
 
-        let orderId = document.getElementById("order-id").value;  // 获取订单 ID
+        let orderId = document.getElementById("order-id").value;  // Retrieve order ID
         let formData = new FormData(this);
 
-        fetch(`/add-review/${orderId}/`, {  // ✅ 确保 URL 传递 order_id
+        fetch(`/add-review/${orderId}/`, {  // Ensure URL passes order_id
             method: "POST",
             body: formData
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert("✅ 评价提交成功！");
-                closeReviewModal();  // ✅ 关闭弹窗
+                alert("✅ Review submitted successfully!");
+                closeReviewModal();  // Close the modal
             } else {
-                alert("❌ 提交失败: " + data.error);
+                alert("❌ Submission failed: " + data.error);
             }
         })
-        .catch(error => console.error("❌ 评价提交失败:", error));
+        .catch(error => console.error("❌ Review submission failed:", error));
     });
 });
     </script>

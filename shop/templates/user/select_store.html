@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>选择商家店铺</title>
+    <title>Select a Merchant Store</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -48,14 +48,14 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">请选择一个商家店铺</div>
+        <div class="header">Please Select a Merchant Store</div>
         <ul class="store-list">
             {% for merchant in merchants %}
                 <li onclick="window.location.href='/users/{{ merchant.store_slug }}/'">
                     {{ merchant.store_name }}
                 </li>
             {% empty %}
-                <p>暂无可选店铺</p>
+                <p>No available stores</p>
             {% endfor %}
         </ul>
     </div>

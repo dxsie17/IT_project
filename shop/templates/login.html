@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -97,7 +97,7 @@
 
 <script>
 document.getElementById("login-form").addEventListener("submit", function(event) {
-    event.preventDefault();  // 阻止表单默认提交
+    event.preventDefault();  // Prevent default form submission
 
     let formData = new FormData(this);
     let csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
@@ -110,18 +110,18 @@ document.getElementById("login-form").addEventListener("submit", function(event)
             "X-CSRFToken": csrfToken
         }
     })
-    .then(response => response.json())  // 解析 JSON 响应
+    .then(response => response.json())  // Parse JSON response
     .then(data => {
         if (data.success) {
-            window.location.href = data.redirect_url;  // 登录成功，跳转
+            window.location.href = data.redirect_url;  // Redirect on successful login
         } else {
-            errorMessage.innerText = data.error;  // 显示错误信息
+            errorMessage.innerText = data.error;  // Display error message
             errorMessage.style.display = "block";
         }
     })
     .catch(error => {
         console.error("Error:", error);
-        errorMessage.innerText = "请稍后再试";
+        errorMessage.innerText = "Please try again later";
         errorMessage.style.display = "block";
     });
 });

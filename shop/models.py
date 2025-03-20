@@ -6,21 +6,21 @@ from django.db.models import Sum, F
 from django.utils.text import slugify
 
 
-# 用户扩展（包括商家和普通用户）
+# User Profile (including both merchants and regular users)
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="userprofile")
     phone_number = models.CharField(max_length=15, blank=True, null=True)
-    is_merchant = models.BooleanField(default=False)  # 是否是商家
-    store_name = models.CharField(max_length=255, blank=True, null=True)  # 商家才有店铺名
-    store_slug = models.SlugField(unique=True, blank=True, null=True)  # 用于 URL 的 slug 字段
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)  # 商家创建时间
+    is_merchant = models.BooleanField(default=False)  # Whether the user is a merchant
+    store_name = models.CharField(max_length=255, blank=True, null=True)  # Only merchants have a store name
+    store_slug = models.SlugField(unique=True, blank=True, null=True)  # Slug field for URL
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)  # Store creation time for merchants
 
     def save(self, *args, **kwargs):
-        # **普通用户不分配 store_slug**
+        # **Regular users do not get assigned a store_slug**
         if not self.is_merchant:
-            self.store_slug = None  # 确保普通用户的 store_slug 为 NULL
+            self.store_slug = None  # Ensure store_slug is NULL for regular users
         else:
-            # **确保商家有唯一的 store_slug**
+            # **Ensure merchants have a unique store_slug**
             if not self.store_slug or self.store_slug.strip() == '':
                 base_slug = slugify(self.store_name) if self.store_name else f"merchant-{self.id}"
                 unique_slug = base_slug
@@ -36,28 +36,29 @@ class UserProfile(models.Model):
 
     def __str__(self):
         if self.is_merchant:
-            return f"商家: {self.store_name}"
-        return f"用户: {self.user.username}"
+            return f"Merchant: {self.store_name}"
+        return f"User: {self.user.username}"
 
 
-# 商品类别
+# Product Category
 class Category(models.Model):
-    """ 商品类别，每个商家有自己的类别 """
+    """ Product categories, each merchant has their own categories """
     merchant = models.ForeignKey(
-        UserProfile,  # 关联商家
+        UserProfile,  # Link to merchant
         on_delete=models.CASCADE,
         related_name="categories",
-        limit_choices_to={'is_merchant': True}  # 只能是商家
+        limit_choices_to={'is_merchant': True}  # Only merchants can create categories
     )
     name = models.CharField(max_length=255)
 
     class Meta:
-        unique_together = ('merchant', 'name')  # 确保同一商家下类别唯一
+        unique_together = ('merchant', 'name')  # Ensure category names are unique within the same merchant
 
     def __str__(self):
         return f"{self.merchant.store_name} - {self.name}"
 
-# 商品信息
+
+# Product Information
 class Item(models.Model):
     merchant = models.ForeignKey(
         UserProfile,
@@ -75,30 +76,42 @@ class Item(models.Model):
     def __str__(self):
         return self.name
 
-def generate_order_number():
-    return uuid.uuid4().hex[:10].upper()
 
-# 订单
+def generate_unique_order_number():
+    """ 生成唯一的订单号 """
+    while True:
+        order_number = uuid.uuid4().hex[:10].upper()  # 生成 10 位随机字符串
+        if not Order.objects.filter(order_number=order_number).exists():
+            return order_number
+
+
+# Order Model
 class Order(models.Model):
     order_number = models.CharField(
         max_length=20, unique=True, default=uuid.uuid4().hex[:10].upper()
-    )  # 订单编号
-    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="customer_orders")  # 下单用户
+    )  # Order number
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="customer_orders")  # User who placed the order
     merchant = models.ForeignKey(UserProfile, on_delete=models.CASCADE, limit_choices_to={'is_merchant': True}, related_name="merchant_orders", null=False, blank=False)
-    items = models.ManyToManyField(Item, through='OrderItem')  # 订单包含的商品
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # 总价
-    # 订单状态
+    items = models.ManyToManyField(Item, through='OrderItem')  # Products included in the order
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Total price
+
+    # Order Status Choices
     status_choices = [
-        ('Ongoing', '进行中'),
-        ('Finished', '已完成'),
-        ('Canceled', '已取消'),
+        ('Ongoing', 'Ongoing'),
+        ('Finished', 'Finished'),
+        ('Canceled', 'Canceled'),
     ]
-    status = models.CharField(max_length=20, choices=status_choices, default='Ongoing')  # 订单状态
-    created_at = models.DateTimeField(auto_now_add=True)  # 订单建立时间
-    updated_at = models.DateTimeField(auto_now=True)  # 订单更新时间
+    status = models.CharField(max_length=20, choices=status_choices, default='Ongoing')  # Order status
+    created_at = models.DateTimeField(auto_now_add=True)  # Order creation time
+    updated_at = models.DateTimeField(auto_now=True)  # Order update time
+
+    def save(self, *args, **kwargs):
+        if not self.order_number:  # 仅在 order_number 为空时生成
+            self.order_number = self.generate_unique_order_number()
+        super().save(*args, **kwargs)
 
     def update_total_price(self):
-        """ 计算订单总价 """
+        """ Calculate the total price of the order """
         total = self.order_items.aggregate(
             total=Sum(F('quantity') * F('item__price'), output_field=models.DecimalField())
         )['total'] or 0.00
@@ -109,50 +122,51 @@ class Order(models.Model):
     def __str__(self):
         return f"Order {self.order_number} - {self.status}"
 
-# 订单中的商品详情
+
+# Order Items (Products within an Order)
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name="ordered_items")  # 增加 related_name
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name="ordered_items")  # Added related_name
     quantity = models.PositiveIntegerField(default=1)
 
     class Meta:
-        unique_together = ('order', 'item')  # 添加唯一性约束
-
+        unique_together = ('order', 'item')  # Ensure each order contains a unique product
 
     def get_total_price(self):
-        """计算当前商品在订单中的总价"""
+        """Calculate the total price for this item in the order"""
         return float(self.item.price) * self.quantity
 
     def save(self, *args, **kwargs):
-        """保存 OrderItem 后更新 Order 总价"""
+        """After saving OrderItem, update Order total price"""
         super().save(*args, **kwargs)
-        self.order.update_total_price()  # 订单自动更新总价
+        self.order.update_total_price()  # Automatically update order total price
 
     def delete(self, *args, **kwargs):
-        """删除 OrderItem 后更新 Order 总价"""
+        """After deleting OrderItem, update Order total price"""
         super().delete(*args, **kwargs)
-        self.order.update_total_price()  # 订单自动更新总价
+        self.order.update_total_price()  # Automatically update order total price
 
     def __str__(self):
         return f"{self.item.name} x {self.quantity}"
 
-# 评分与评论
+
+# Ratings and Reviews
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True, null=True, related_name="reviews")
     order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True, related_name="order_reviews")
-    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])  # 1-5 评分
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])  # Ratings from 1 to 5
     comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def clean(self):
-        """ 确保 `item` 和 `order` 只能存在一个 """
+        """ Ensure that either `item` or `order` exists, but not both """
         if self.item and self.order:
-            raise ValidationError("评论不能同时针对商品和订单，请选择一个")
+            raise ValidationError("A review cannot be for both an item and an order at the same time. Please choose one.")
         if not self.item and not self.order:
-            raise ValidationError("评论必须针对一个商品或订单")
+            raise ValidationError("A review must be associated with either an item or an order.")
 
     def __str__(self):
         if self.item:
-            return f"用户 {self.user.username} 对 {self.item.name} 的评价"
-        return f"用户 {self.user.username} 对订单 {self.order.order_number} 的评价"
+            return f"User {self.user.username} reviewed {self.item.name}"
+        return f"User {self.user.username} reviewed Order {self.order.order_number}"

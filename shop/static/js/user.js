@@ -1,6 +1,6 @@
-    document.addEventListener("DOMContentLoaded", function () {
-        updateCartDisplay();  // ✅ 页面加载时刷新购物车
-    });
+document.addEventListener("DOMContentLoaded", function () {
+    updateCartDisplay();  // ✅ Refresh cart when the page loads
+});
 
 function loadItemDetail(itemId) {
     fetch(`/item/${itemId}/`)
@@ -10,55 +10,55 @@ function loadItemDetail(itemId) {
             document.getElementById("detail-price").innerText = data.price;
             document.getElementById("detail-description").innerText = data.description;
 
-            // **显示商品图片**
+            // Display product image
             const imageElement = document.getElementById("detail-image");
             if (data.image) {
-                imageElement.src = data.image;
-                imageElement.style.display = "block";  // 显示图片
+                imageElement.src = data .image;
+                imageElement.style.display = "block";  // Show image
             } else {
-                imageElement.style.display = "none";   // 没有图片时隐藏
+                imageElement.style.display = "none";   // Hide if no image is available
             }
 
-            // **绑定加入购物车功能**
+            // Bind add-to-cart functionality
             document.getElementById("detail-add-cart").setAttribute("onclick", `addToBasket(${data.id})`);
 
-            // **显示弹窗**
+            // Show popup
             document.getElementById("product-detail").style.display = "block";
         })
         .catch(error => {
-            console.error('加载商品详情错误:', error);
-            alert('无法加载商品详情，请稍后再试');
+            console.error('Error loading product details:', error);
+            alert('Unable to load product details, please try again later.');
         });
 }
 
 function closeItemDetail() {
-    document.getElementById("product-detail").style.display = "none";  // 关闭弹窗
+    document.getElementById("product-detail").style.display = "none";  // Close popup
 }
 
-      // 添加到购物车
+// Add to cart
 function addToBasket(itemId) {
     fetch(`/add-to-basket/${itemId}/`, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': getCSRFToken(),  // ✅ 传递 CSRF 令牌
+            'X-CSRFToken': getCSRFToken(),  // ✅ Pass CSRF token
             'Content-Type': 'application/json'
         }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            updateCartDisplay();  // ✅ 更新购物车
+            updateCartDisplay();  // ✅ Update cart
         } else {
-            alert('添加失败: ' + (data.error || '未知错误'));
+            alert('Failed to add: ' + (data.error || 'Unknown error'));
         }
     })
     .catch(error => {
-        console.error('添加购物车错误:', error);
-        alert('网络错误，请稍后再试');
+        console.error('Error adding to cart:', error);
+        alert('Network error, please try again later.');
     });
 }
 
-      // 更新购物车显示
+// Update cart display
 function updateCartDisplay() {
     fetch('/get-cart/')
         .then(response => response.json())
@@ -75,7 +75,7 @@ function updateCartDisplay() {
                     </div>
                     <div class="item-actions">
                         <span class="price">£${item.total_price.toFixed(2)}</span>
-                        <button class="btn-remove" onclick="removeItem(${item.id})">移除</button>
+                        <button class="btn-remove" onclick="removeItem(${item.id})">Remove</button>
                     </div>
                 </div>
             `).join('');
@@ -84,21 +84,21 @@ function updateCartDisplay() {
             if (data.items.length) {
                 cartElement.innerHTML = cartHtml;
             } else {
-                cartElement.innerHTML = '<p class="empty-cart">购物车为空</p>';
+                cartElement.innerHTML = '<p class="empty-cart">Cart is empty</p>';
             }
 
-            // ✅ 更新总价显示
-            document.getElementById("cart-total-price").innerText = `总价: £${data.total_price.toFixed(2)}`;
+            // ✅ Update total price display
+            document.getElementById("cart-total-price").innerText = `Total: £${data.total_price.toFixed(2)}`;
         })
-        .catch(error => console.error("❌ 获取购物车数据失败:", error));
+        .catch(error => console.error("❌ Failed to fetch cart data:", error));
 }
 
-      // 减少数量
+// Decrease quantity
 function decreaseQuantity(itemId) {
     fetch(`/decrease-from-basket/${itemId}/`, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': getCSRFToken(),  // ✅ 这里替换成获取 CSRF 令牌的方法
+            'X-CSRFToken': getCSRFToken(),  // ✅ Replace with method to get CSRF token
             'Content-Type': 'application/json'
         }
     })
@@ -110,29 +110,39 @@ function decreaseQuantity(itemId) {
     })
     .then(data => {
         if (data.success) {
-            updateCartDisplay();  // ✅ 更新购物车
+            updateCartDisplay();  // ✅ Update cart
         } else {
-            alert(`减少数量失败: ${data.error}`);
+            alert(`Failed to decrease quantity: ${data.error}`);
         }
     })
     .catch(error => {
-        console.error("❌ 购物车减少数量失败:", error);
-        alert("网络错误，请稍后重试");
+        console.error("❌ Failed to decrease item quantity:", error);
+        alert("Network error, please try again later.");
     });
 }
 
-      // 完全移除
-      function removeItem(itemId) {
-        fetch(`/remove-from-basket/${itemId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => data.success && updateCartDisplay());
-      }
+// Completely remove item
+function removeItem(itemId) {
+    fetch(`/remove-from-basket/${itemId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateCartDisplay();
+        } else {
+            alert("❌ Failed to remove item: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("❌ Error removing item:", error);
+        alert("❌ Network error, please try again later.");
+    });
+}
 
 function getCSRFToken() {
     let cookieValue = null;
@@ -148,25 +158,27 @@ function getCSRFToken() {
     }
     return cookieValue;
 }
+
+// Checkout function
 function checkout() {
     fetch('/checkout/', {
         method: 'POST',
         headers: {
-            'X-CSRFToken': getCSRFToken(),  // 获取 CSRF 令牌
+            'X-CSRFToken': getCSRFToken(),  // Get CSRF token
             'Content-Type': 'application/json'
         }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('✅ 结算成功！');
-            updateCartDisplay(); // 结算成功后更新购物车
+            alert('✅ Checkout successful!');
+            updateCartDisplay(); // Update cart after successful checkout
         } else {
-            alert('❌ 结算失败: ' + (data.error || '未知错误'));
+            alert('❌ Checkout failed: ' + (data.error || 'Unknown error'));
         }
     })
     .catch(error => {
-        console.error('❌ 结算错误:', error);
-        alert('网络错误，请稍后再试');
+        console.error('❌ Checkout error:', error);
+        alert('Network error, please try again later.');
     });
 }

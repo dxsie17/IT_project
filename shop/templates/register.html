@@ -96,16 +96,16 @@
                 </div>
             {% endif %}
             <input type="email" name="email" placeholder="Email" required>
-            <input type="tel" name="phone" placeholder="Tel" required>
+            <input type="tel" name="phone" placeholder="Phone" required>
             <input type="password" name="password1" placeholder="Password" required>
             <input type="password" name="password2" placeholder="Re-enter Password" required>
 
-            <!-- 添加商家注册选项 -->
+            <!-- Add merchant registration option -->
             <label>
                 <input type="checkbox" name="is_merchant"> Register as a merchant
             </label>
 
-            <!-- 添加商家店铺名输入（仅在勾选时显示） -->
+            <!-- Merchant store name input (only visible when checkbox is selected) -->
             <div id="store-name-field" style="display: none;">
                 <input type="text" name="store_name" placeholder="Store Name">
             </div>
@@ -113,7 +113,7 @@
             <button type="submit" class="btn">Register</button>
         </form>
         <div class="link">
-            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'user_login' %}">Login</a>
         </div>
 
     </div>
@@ -122,22 +122,23 @@
             const isMerchantCheckbox = document.querySelector('input[name="is_merchant"]');
             const storeNameField = document.getElementById('store-name-field');
             const storeNameInput = document.querySelector('input[name="store_name"]');
+
             function toggleStoreNameField() {
-            if (isMerchantCheckbox.checked) {
-                storeNameField.style.display = "block";
-                storeNameInput.setAttribute("required", "true");
-            } else {
-                storeNameField.style.display = "none";
-                storeNameInput.removeAttribute("required");  // 移除 required
-                storeNameInput.value = "";  // 避免提交空值
+                if (isMerchantCheckbox.checked) {
+                    storeNameField.style.display = "block";
+                    storeNameInput.setAttribute("required", "true");
+                } else {
+                    storeNameField.style.display = "none";
+                    storeNameInput.removeAttribute("required");  // Remove required attribute
+                    storeNameInput.value = "";  // Prevent submitting empty value
+                }
             }
-        }
 
-        // 监听 checkbox 变化
-        isMerchantCheckbox.addEventListener("change", toggleStoreNameField);
+            // Listen for checkbox change
+            isMerchantCheckbox.addEventListener("change", toggleStoreNameField);
 
-        // 页面加载时确保状态同步
-        toggleStoreNameField();
+            // Ensure the state is synchronized on page load
+            toggleStoreNameField();
         });
     </script>
 </body>

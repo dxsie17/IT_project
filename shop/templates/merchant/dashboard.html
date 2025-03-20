@@ -1,14 +1,14 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>商家后台 - {{ store_name }}</title>
+    <title>Merchant Dashboard - {{ store_name }}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/merchant_dashboard.css' %}?v=2">
 </head>
 <body>
 
-    <!-- 顶部导航栏 -->
+    <!-- Top Navigation Bar -->
     <div class="navbar">
         <div class="store-info">{{ store_name }}</div>
         <div class="nav-links">
@@ -16,44 +16,44 @@
             <a href="javascript:void(0);" class="tab" data-tab="items">Item Catalog</a>
             <a href="javascript:void(0);" class="tab" data-tab="management">Management</a>
         </div>
-        <a href="{% url 'logout' %}" class="logout">登出</a>
+        <a href="{% url 'logout' %}" class="logout">Logout</a>
     </div>
 
     <div class="container">
-        <!-- 订单管理的侧边栏 -->
+        <!-- Sidebar for Order Management -->
         <div class="sidebar orders-sidebar">
             <a href="?status=Ongoing" class="{% if status_filter == 'Ongoing' %}active{% endif %}">Ongoing</a>
             <a href="?status=Finished" class="{% if status_filter == 'Finished' %}active{% endif %}">Finished</a>
             <a href="?status=Canceled" class="{% if status_filter == 'Canceled' %}active{% endif %}">Canceled</a>
         </div>
 
-        <!-- 商品管理的侧边栏 -->
+        <!-- Sidebar for Item Management -->
         <div class="sidebar items-sidebar" style="display: none;">
-            <a href="javascript:void(0);" class="category-link active" data-category-id="">全部商品</a>
+            <a href="javascript:void(0);" class="category-link active" data-category-id="">All Items</a>
             {% if categories %}
                 {% for category in categories %}
                     <a href="javascript:void(0);" class="category-link" data-category-id="{{ category.id }}">{{ category.name }}</a>
                 {% endfor %}
             {% else %}
-                <p class="no-category">暂无商品类别</p>
+                <p class="no-category">No item categories available</p>
             {% endif %}
-             <!-- ✅ 以 `Tab` 形式展示新增类别 -->
-            <a href="javascript:void(0);" id="add-category-tab" class="category-link add-category">+ 新增类别</a>
+            <!-- ✅ Tab to add a new category -->
+            <a href="javascript:void(0);" id="add-category-tab" class="category-link add-category">+ Add Category</a>
 
-            <!-- 新增类别表单 (默认隐藏) -->
+            <!-- New category form (hidden by default) -->
             <div id="add-category-form" style="display: none;">
-                <input type="text" id="new-category-name" placeholder="类别名称">
-                <button onclick="submitCategory()">提交</button>
-                <button onclick="hideCategoryForm()">取消</button>
+                <input type="text" id="new-category-name" placeholder="Category Name">
+                <button onclick="submitCategory()">Submit</button>
+                <button onclick="hideCategoryForm()">Cancel</button>
             </div>
         </div>
 
-        <!-- management管理的侧边栏 -->
+        <!-- Sidebar for Management -->
         <div class="sidebar management-sidebar" style="display: none;">
                 <a href="javascript:void(0);" class="tab-link active" data-tab="review">Review</a>
         </div>
 
-        <!-- 订单管理 -->
+        <!-- Order Management -->
         <div id="orders" class="content tab-content active">
             {% if orders %}
                 {% for order in orders %}
@@ -71,25 +71,25 @@
                         </div>
                     </div>
                     {% endfor %}
-                    <p style="text-align: right;"><strong>总价: £{{ order.total_price|floatformat:2 }}</strong></p>
+                    <p style="text-align: right;"><strong>Total: £{{ order.total_price|floatformat:2 }}</strong></p>
 
-                    <!-- 仅 Ongoing 订单显示操作按钮 -->
+                    <!-- Show action buttons only for Ongoing orders -->
                     {% if order.status == "Ongoing" %}
                     <div class="order-actions">
                         {% if order.status == "Ongoing" %}
-                            <button class="btn finish" onclick="updateOrderStatus({{ order.id }}, 'Finished')">完成</button>
-                            <button class="btn cancel" onclick="updateOrderStatus({{ order.id }}, 'Canceled')">取消</button>
+                            <button class="btn finish" onclick="updateOrderStatus({{ order.id }}, 'Finished')">Complete</button>
+                            <button class="btn cancel" onclick="updateOrderStatus({{ order.id }}, 'Canceled')">Cancel</button>
                         {% endif %}
                     </div>
                     {% endif %}
                 </div>
                 {% endfor %}
             {% else %}
-                <p>暂无订单</p>
+                <p>No orders available</p>
             {% endif %}
         </div>
 
-        <!-- 商品管理 -->
+        <!-- Item Management -->
         <div id="items" class="content tab-content" style="display: none;">
             <div id="item-list" class="item-list">
                 {% for item in items %}
@@ -98,10 +98,10 @@
                     <div class="item-info">
                         <h3>{{ item.name }}</h3>
                         <p>ID: {{ item.id }}</p>
-                        <p>价格: £{{ item.price }}</p>
-                        <p>分类: {{ item.category.name }}</p>
+                        <p>Price: £{{ item.price }}</p>
+                        <p>Category: {{ item.category.name }}</p>
 
-                        <!-- 商品管理按钮 -->
+                        <!-- Item management buttons -->
                         <button id="toggle-btn-{{ item.id }}"
                             onclick="toggleItemAvailability({{ item.id }}, {{ item.is_available|yesno:'false,true' }})">
                         {% if item.is_available %}Delist{% else %}List{% endif %}
@@ -111,43 +111,43 @@
                     </div>
                 </div>
                 {% endfor %}
-                <!-- ✅ 新增商品按钮 (作为商品卡片) -->
+                <!-- ✅ Add new item button (as an item card) -->
                 <div id="add-item-card" class="item-card add-item-card" onclick="showAddItemForm()">
                     <span class="add-icon">+</span>
                 </div>
             </div>
         </div>
 
-        <!-- 商品编辑弹窗 -->
+        <!-- Item Edit Modal -->
         <div id="edit-item-modal" class="modal" style="display: none;">
             <div class="modal-content">
                 <span class="close" onclick="closeEditItemModal()">&times;</span>
-                <h2>编辑商品</h2>
+                <h2>Edit Item</h2>
 
-                <!-- 隐藏的商品 ID -->
+                <!-- Hidden item ID -->
                 <input type="hidden" id="edit-item-id">
 
-                <!-- 商品名 -->
+                <!-- Item Name -->
                 <div class="modal-row">
-                    <label class="modal-label" for="edit-item-name">商品名:</label>
+                    <label class="modal-label" for="edit-item-name">Item Name:</label>
                     <input type="text" id="edit-item-name" class="modal-input">
                 </div>
 
-                <!-- 价格 -->
+                <!-- Price -->
                 <div class="modal-row">
-                    <label class="modal-label" for="edit-item-price">价格 (£):</label>
+                    <label class="modal-label" for="edit-item-price">Price (£):</label>
                     <input type="number" id="edit-item-price" step="0.01" class="modal-input">
                 </div>
 
-                <!-- 描述 -->
+                <!-- Description -->
                 <div class="modal-row">
-                    <label class="modal-label" for="edit-item-description">描述:</label>
+                    <label class="modal-label" for="edit-item-description">Description:</label>
                     <textarea id="edit-item-description" class="modal-textarea"></textarea>
                 </div>
 
-                <!-- 商品类别 -->
+                <!-- Item Category -->
                 <div class="modal-row">
-                    <label class="modal-label" for="edit-item-category">类别:</label>
+                    <label class="modal-label" for="edit-item-category">Category:</label>
                     <select id="edit-item-category" class="modal-select">
                         {% for category in categories %}
                             <option value="{{ category.id }}">{{ category.name }}</option>
@@ -155,33 +155,33 @@
                     </select>
                 </div>
 
-                <!-- 商品图片 -->
+                <!-- Item Image -->
                 <div class="modal-row">
-                    <label class="modal-label">商品图片:</label>
+                    <label class="modal-label">Item Image:</label>
                     <div class="image-upload-container">
                         <img id="preview-item-image" src="" class="preview-image">
                         <label class="upload-btn">
-                            选择文件
+                            Choose File
                             <input type="file" id="edit-item-image" class="modal-input-file" accept="image/*">
                         </label>
                     </div>
                 </div>
 
-                <!-- 按钮 -->
+                <!-- Buttons -->
                 <div class="modal-buttons">
-                    <button type="button" class="save-btn" onclick="saveItemEdit()">保存</button>
-                    <button type="button" class="cancel-btn" onclick="closeEditItemModal()">取消</button>
+                    <button type="button" class="save-btn" onclick="saveItemEdit()">Save</button>
+                    <button type="button" class="cancel-btn" onclick="closeEditItemModal()">Cancel</button>
                 </div>
             </div>
         </div>
 
-        <!-- 管理界面 -->
+        <!-- Management Section -->
         <div id="management" class="content tab-content" style="display: none;">
-            <!-- 评论展示区 -->
+            <!-- Review Section -->
             <div id="review" class="review-container">
-                <h2>用户评论</h2>
+                <h2>User Reviews</h2>
                 <div id="review-list">
-                    <p>加载中...</p> <!-- 默认显示 -->
+                    <p>Loading...</p> <!-- Default display -->
                 </div>
             </div>
         </div>

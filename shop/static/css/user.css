@@ -1,4 +1,4 @@
-/* 🌍 全局样式 */
+/* 🌍 Global Styles */
 body {
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
@@ -9,7 +9,7 @@ body {
     height: 100vh;
 }
 
-/* 📌 顶部商家标题 */
+/* 📌 Store Header */
 .store-header {
     font-size: 24px;
     font-weight: bold;
@@ -25,16 +25,16 @@ body {
     z-index: 1000;
 }
 
-/* 🏠 主容器布局 */
+/* 🏠 Main Container Layout */
 .main-container {
     display: flex;
     width: 100%;
     min-height: 100vh;
-    padding-top: 60px; /* 避免被标题遮挡 */
+    padding-top: 60px; /* Prevents content from being hidden behind the header */
     box-sizing: border-box;
 }
 
-/* 📌 侧边栏（左侧导航） */
+/* 📌 Sidebar (Left Navigation) */
 .sidebar {
     width: 240px;
     background: #5a7f4f;
@@ -47,7 +47,7 @@ body {
     box-sizing: border-box;
 }
 
-/* 📌 侧边栏分类标题 */
+/* 📌 Sidebar Category Title */
 .nav-title {
     font-size: 20px;
     font-weight: bold;
@@ -57,7 +57,7 @@ body {
     letter-spacing: 1px;
 }
 
-/* 📌 分类按钮 */
+/* 📌 Sidebar Navigation Items */
 .nav-item {
     padding: 14px;
     text-align: center;
@@ -81,7 +81,7 @@ body {
     font-weight: bold;
 }
 
-/* 📌 右侧主要内容 */
+/* 📌 Right Main Content */
 .content {
     flex-grow: 1;
     padding: 20px;
@@ -90,17 +90,18 @@ body {
     box-sizing: border-box;
 }
 
-/* 🛍️ 商品列表 */
+/* 🛍️ Product Grid */
 .item-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 自动适应列数 */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
-    justify-items: center;
+    justify-content: start;
     max-width: 1000px;
     width: 100%;
+    align-items: start;
 }
 
-/* 📦 商品卡片 */
+/* 📦 Product Card */
 .item-card {
     background: white;
     padding: 15px;
@@ -108,6 +109,10 @@ body {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     text-align: center;
     width: 250px;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     transition: transform 0.3s, box-shadow 0.3s;
     cursor: pointer;
 }
@@ -117,7 +122,7 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* 📷 商品图片 */
+/* 📷 Product Image */
 .item-image {
     width: 100%;
     height: 200px;
@@ -126,7 +131,7 @@ body {
     margin-bottom: 10px;
 }
 
-/* 📌 商品信息 */
+/* 📌 Product Information */
 .item-name {
     font-size: 18px;
     font-weight: bold;
@@ -142,7 +147,7 @@ body {
     display: block;
 }
 
-/* ✅ 购物车按钮 */
+/* ✅ Add to Cart Button */
 .btn-success {
     width: 100%;
     padding: 10px;
@@ -160,7 +165,7 @@ body {
     background: #4b6b3c;
 }
 
-/* 🛒 购物车侧边栏 */
+/* 🛒 Cart Sidebar */
 .cart-sidebar {
     width: 320px;
     height: calc(100vh - 60px);
@@ -172,14 +177,14 @@ body {
     box-sizing: border-box;
 }
 
-/* 📌 购物车标题 */
+/* 📌 Cart Title */
 .cart-sidebar h3 {
     font-size: 22px;
     font-weight: bold;
     margin-bottom: 15px;
 }
 
-/* 📦 购物车商品 */
+/* 📦 Cart Item */
 .cart-item {
     display: flex;
     justify-content: space-between;
@@ -189,7 +194,7 @@ body {
     font-size: 16px;
 }
 
-/* 📦 购物车商品按钮 */
+/* 📦 Remove Cart Item Button */
 .cart-item .btn-remove {
     background: red;
     color: white;
@@ -199,7 +204,7 @@ body {
     cursor: pointer;
 }
 
-/* ✅ 购物车结算按钮 */
+/* ✅ Checkout Button */
 .checkout-btn {
     width: 100%;
     padding: 12px;
@@ -216,7 +221,7 @@ body {
     background: #4b6b3c;
 }
 
-/* ✨ 弹窗样式 */
+/* ✨ Modal Popup */
 .modal {
     display: none;
     position: fixed;
@@ -227,7 +232,7 @@ body {
     width: 600px;
     max-width: 90%;
     background-color: white;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
     border-radius: 10px;
 }
 
@@ -235,11 +240,14 @@ body {
     padding: 20px;
 }
 
+/* ❌ Close Button */
 .close-btn {
     float: right;
     font-size: 24px;
     cursor: pointer;
 }
+
+/* 🚪 Logout Button */
 .logout-btn {
     position: fixed;
     top: 10px;

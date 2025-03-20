@@ -19,40 +19,40 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add("active");
         document.getElementById(tabName).style.display = "block";
 
-        // ✅ **获取 Management 侧边栏**
+        // ✅ Get the Management sidebar
         const managementSidebar = document.querySelector(".management-sidebar");
 
-        // ✅ **隐藏所有侧边栏**
+        // ✅ Hide all sidebars
         orderSidebar.style.display = "none";
         itemSidebar.style.display = "none";
         if (managementSidebar) managementSidebar.style.display = "none";
 
-        // ✅ **选择性显示侧边栏**
+        // ✅ Conditionally show sidebars
         if (tabName === "items") {
             itemSidebar.style.display = "block";
-            loadCategories();  // ✅ **加载类别**
+            loadCategories();  // ✅ Load categories
         } else if (tabName === "orders") {
             orderSidebar.style.display = "block";
         } else if (tabName === "management") {
             if (managementSidebar) {
-                managementSidebar.style.display = "block"; // ✅ **显示 Management 侧边栏**
+                managementSidebar.style.display = "block"; // ✅ Show Management sidebar
             }
-            loadReviews(); // ✅ **加载用户评论**
+            loadReviews(); // ✅ Load user reviews
         }
     }
 
-    // ✅ **绑定点击事件**
+    // ✅ Bind click events
     tabs.forEach(tab => {
         tab.addEventListener("click", function () {
             switchTab(this.getAttribute("data-tab"));
         });
     });
 
-    // ✅ **初始加载**
+    // ✅ Initial loading
     loadCategories();
     loadItems();
 
-    // ✅ 监听文件选择事件
+    // ✅ Listen for file selection event
     const imageInput = document.getElementById("edit-item-image");
     const previewImage = document.getElementById("preview-item-image");
 
@@ -72,80 +72,80 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
 function updateOrderStatus(orderId, newStatus) {
-    fetch(`/merchant/orders/update/${orderId}/`, {  // ✅ 确保和 Django URL 匹配
+    fetch(`/merchant/orders/update/${orderId}/`, {  // ✅ Ensure it matches the Django URL
         method: "POST",
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded",  // ✅ 传递 FormData
-            "X-CSRFToken": getCSRFToken()  // 确保 CSRF Token 存在
+            "Content-Type": "application/x-www-form-urlencoded",  // ✅ Send FormData
+            "X-CSRFToken": getCSRFToken()  // Ensure CSRF Token is included
         },
         body: `status=${encodeURIComponent(newStatus)}`
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(`✅ 订单 ${orderId} 状态已更新为 ${newStatus}`);
-            location.reload(); // 刷新页面，更新订单状态
+            alert(`✅ Order ${orderId} status updated to ${newStatus}`);
+            location.reload(); // Refresh the page to update order status
         } else {
-            alert(`❌ 更新失败: ${data.error}`);
+            alert(`❌ Update failed: ${data.error}`);
         }
     })
     .catch(error => {
-        console.error("❌ 更新订单状态失败:", error);
-        alert("❌ 网络错误，无法更新订单状态！");
+        console.error("❌ Failed to update order status:", error);
+        alert("❌ Network error, unable to update order status!");
     });
 }
 
-
 function loadCategories() {
-    console.log("🚀 正在获取商品类别...");
+    console.log("🚀 Fetching product categories...");
     fetch(`/merchant/categories/`, {
         method: "GET",
         headers: { "X-Requested-With": "XMLHttpRequest" }
     })
     .then(response => response.json())
     .then(data => {
-        console.log("✅ 类别数据:", data.categories);  // **调试**
+        console.log("✅ Category data:", data.categories);  // **Debugging**
 
         const categorySidebar = document.querySelector(".items-sidebar");
-        categorySidebar.innerHTML = '<a href="javascript:void(0);" class="category-link active" data-category-id="">全部商品</a>';
+        categorySidebar.innerHTML = '<a href="javascript:void(0);" class="category-link active" data-category-id="">All Products</a>';
 
         if (data.categories.length > 0) {
             data.categories.forEach(category => {
                 categorySidebar.innerHTML += `<a href="javascript:void(0);" class="category-link" data-category-id="${category.id}">${category.name}</a>`;
             });
         } else {
-            categorySidebar.innerHTML += `<p class="no-category">暂无商品类别</p>`;
+            categorySidebar.innerHTML += `<p class="no-category">No categories available</p>`;
         }
         categorySidebar.innerHTML += `
-                <a href="javascript:void(0);" id="add-category-tab" class="category-link add-category">+ 新增类别</a>
+                <a href="javascript:void(0);" id="add-category-tab" class="category-link add-category">+ Add Category</a>
                 <div id="add-category-form" style="display: none; padding: 10px;">
-                    <input type="text" id="new-category-name" placeholder="输入类别名称">
-                    <button onclick="submitCategory()">提交</button>
-                    <button onclick="hideCategoryForm()">取消</button>
+                    <input type="text" id="new-category-name" placeholder="Enter category name">
+                    <button onclick="submitCategory()">Submit</button>
+                    <button onclick="hideCategoryForm()">Cancel</button>
                 </div>
             `;
 
-        setupCategoryClickEvents();  // ✅ **类别更新后重新绑定点击事件**
+        setupCategoryClickEvents();  // ✅ Rebind click events after updating categories
         document.getElementById("add-category-tab").addEventListener("click", function () {
             document.getElementById("add-category-form").style.display = "block";
             document.getElementById("new-category-name").focus();
         });
     })
-    .catch(error => console.error("❌ 获取商品类别失败:", error));
+    .catch(error => console.error("❌ Failed to fetch categories:", error));
 }
 
 function setupCategoryClickEvents() {
     document.querySelectorAll(".category-link").forEach(link => {
         link.addEventListener("click", function () {
-            // 如果编辑窗口是打开的，弹出警告
+            // If the edit window is open, show a warning
             const editModal = document.getElementById("edit-item-modal");
             if (editModal.style.display === "block") {
-                const confirmSwitch = confirm("您正在编辑商品，切换类别将丢失未保存的更改，是否继续？");
+                const confirmSwitch = confirm("You are editing a product. Switching categories will discard unsaved changes. Continue?");
                 if (!confirmSwitch) return;
             }
 
-            // 切换类别
+            // Switch category
             document.querySelectorAll(".category-link").forEach(el => el.classList.remove("active"));
             this.classList.add("active");
 
@@ -155,7 +155,7 @@ function setupCategoryClickEvents() {
     });
 }
 
-// ✅ 绑定新增类别输入框的 `Enter` 事件
+// ✅ Bind "Enter" key event for adding categories
 function setupAddCategoryEvents() {
     const categoryInput = document.getElementById("new-category-name");
     categoryInput.addEventListener("keypress", function (event) {
@@ -165,18 +165,18 @@ function setupAddCategoryEvents() {
     });
 }
 
-// ✅ 提交新增类别
+// ✅ Submit new category
 function submitCategory() {
     const categoryName = document.getElementById("new-category-name").value.trim();
     if (!categoryName) {
-        alert("请输入类别名称！");
+        alert("Please enter a category name!");
         return;
     }
 
     fetch(`/merchant/category/add/`, {
         method: "POST",
         headers: {
-            "X-CSRFToken": getCSRFToken(),  // ✅ 确保 CSRF 令牌存在
+            "X-CSRFToken": getCSRFToken(),  // ✅ Ensure CSRF token exists
             "Content-Type": "application/x-www-form-urlencoded"
         },
         body: `category_name=${encodeURIComponent(categoryName)}`
@@ -184,27 +184,28 @@ function submitCategory() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert("✅ 类别添加成功！");
+            alert("✅ Category added successfully!");
             document.getElementById("add-category-form").style.display = "none";
             loadCategories();
         } else {
-            alert("❌ 添加失败: " + data.error);
+            alert("❌ Failed to add category: " + data.error);
         }
     })
-    .catch(error => console.error("❌ 添加类别失败:", error));
+    .catch(error => console.error("❌ Failed to add category:", error));
 }
-// 显示添加类别表单
+
+// Show add category form
 function showCategoryForm() {
     document.getElementById("add-category-form").style.display = "block";
 }
 
-// 隐藏添加类别表单
+// Hide add category form
 function hideCategoryForm() {
     document.getElementById("add-category-form").style.display = "none";
 }
 
 function loadItems(categoryId = "") {
-    console.log(`🚀 加载类别 ${categoryId} 的商品...`);
+    console.log(`🚀 Loading products for category ${categoryId}...`);
     fetch(`/merchant/manage_items/?category_id=${categoryId}`, {
         method: "GET",
         headers: { "X-Requested-With": "XMLHttpRequest" }
@@ -212,53 +213,53 @@ function loadItems(categoryId = "") {
     .then(response => response.json())
     .then(data => {
         const itemContainer = document.getElementById("item-list");
-        itemContainer.innerHTML = "";  // 先清空商品列表
+        itemContainer.innerHTML = "";  // Clear the product list
 
         if (data.items.length > 0) {
             data.items.forEach(item => {
-                // ✅ 创建商品卡片
+                // ✅ Create product card
                 let itemCard = document.createElement("div");
                 itemCard.classList.add("item-card");
 
-                // ✅ 创建商品图片
+                // ✅ Create product image
                 let img = document.createElement("img");
                 img.src = item.image ? item.image : "/static/img/1.jpeg";
                 img.alt = item.name;
                 itemCard.appendChild(img);
 
-                // ✅ 商品信息
+                // ✅ Product information
                 let itemInfo = document.createElement("div");
                 itemInfo.classList.add("item-info");
                 itemInfo.innerHTML = `
                     <h3>${item.name}</h3>
                     <p>ID: ${ item.id }</p>
-                    <p>价格: £${item.price}</p>
-                    <p>分类: ${item.category}</p>
+                    <p>Price: £${item.price}</p>
+                    <p>Category: ${item.category}</p>
                 `;
                 itemCard.appendChild(itemInfo);
 
-                // ✅ 创建 "上架/下架" 按钮
+                // ✅ Create "List/Delist" button
                 let toggleBtn = document.createElement("button");
                 toggleBtn.textContent = item.is_available ? "Delist" : "List";
                 toggleBtn.classList.add("toggle-availability-btn");
                 toggleBtn.onclick = () => toggleItemAvailability(item.id, item.is_available);
                 itemCard.appendChild(toggleBtn);
 
-                // ✅ 创建 "编辑" 按钮
+                // ✅ Create "Edit" button
                 let editBtn = document.createElement("button");
-                editBtn.textContent = "✏️ 编辑";
+                editBtn.textContent = "✏️ Edit";
                 editBtn.classList.add("edit-btn");
                 editBtn.onclick = () => editItem(item.id);
                 itemCard.appendChild(editBtn);
 
-                // ✅ 创建 "删除" 按钮
+                // ✅ Create "Delete" button
                 let deleteBtn = document.createElement("button");
-                deleteBtn.textContent = "🗑️ 删除";
+                deleteBtn.textContent = "🗑️ Delete";
                 deleteBtn.classList.add("delete-btn");
                 deleteBtn.onclick = () => deleteItem(item.id);
                 itemCard.appendChild(deleteBtn);
 
-                // ✅ 添加到商品列表
+                // ✅ Add to product list
                 itemContainer.appendChild(itemCard);
             });
         }
@@ -272,12 +273,12 @@ function loadItems(categoryId = "") {
             itemContainer.appendChild(addItemCard);
         }
     })
-    .catch(error => console.error("获取商品失败:", error));
+    .catch(error => console.error("Failed to fetch products:", error));
 }
 
-//上架、下架商品
+// List/Delist product
 function toggleItemAvailability(itemId, isAvailable) {
-    console.log(`🚀 切换商品 ID: ${itemId} 状态, 当前状态: ${isAvailable}`);
+    console.log(`🚀 Toggling product ID: ${itemId}, Current status: ${isAvailable}`);
 
     fetch(`/merchant/item/toggle/${itemId}/`, {
         method: "POST",
@@ -287,35 +288,35 @@ function toggleItemAvailability(itemId, isAvailable) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert("✅ 商品状态更新成功！");
+            alert("✅ Product status updated successfully!");
 
-            // ✅ 重新加载商品，确保按钮绑定正常
+            // ✅ Reload products to ensure button bindings work correctly
             loadItems();
         } else {
-            alert("❌ 更新失败: " + data.error);
+            alert("❌ Update failed: " + data.error);
         }
     })
-    .catch(error => console.error("❌ 更新商品状态失败:", error));
+    .catch(error => console.error("❌ Failed to update product status:", error));
 }
 
-// 弹出编辑商品窗口
+// Show edit product modal
 function editItem(itemId = null, categoryId = "") {
     const itemIdField = document.getElementById("edit-item-id");
     const nameField = document.getElementById("edit-item-name");
     const priceField = document.getElementById("edit-item-price");
     const descriptionField = document.getElementById("edit-item-description");
     const categorySelect = document.getElementById("edit-item-category");
-    const previewImage = document.getElementById("preview-item-image"); // ✅ 这里获取预览图片的标签
+    const previewImage = document.getElementById("preview-item-image"); // ✅ Get the preview image element
 
     if (itemId) {
-        // ✅ 编辑模式
+        // ✅ Edit mode
         fetch(`/merchant/item/details/${itemId}/`, {
             method: "GET",
             headers: { "X-Requested-With": "XMLHttpRequest" }
         })
         .then(response => response.json())
         .then(item => {
-            console.log("📌 获取商品数据:", item);
+            console.log("📌 Retrieved product data:", item);
 
             itemIdField.value = item.id;
             nameField.value = item.name;
@@ -331,7 +332,7 @@ function editItem(itemId = null, categoryId = "") {
                 categorySelect.appendChild(option);
             });
 
-            // ✅ 如果商品有图片，显示预览
+            // ✅ Display preview image if available
             if (previewImage) {
                 if (item.image) {
                     previewImage.src = item.image;
@@ -346,11 +347,11 @@ function editItem(itemId = null, categoryId = "") {
             document.getElementById("edit-item-modal").style.alignItems = "center";
         })
         .catch(error => {
-            console.error("❌ 获取商品信息失败:", error);
-            alert("❌ 发生错误，请检查 API 是否正确！");
+            console.error("❌ Failed to fetch product details:", error);
+            alert("❌ An error occurred, please check if the API is correct!");
         });
     } else {
-        // ✅ 新增模式
+        // ✅ Add new product mode
         itemIdField.value = "";
         nameField.value = "";
         priceField.value = "";
@@ -376,31 +377,31 @@ function editItem(itemId = null, categoryId = "") {
             document.getElementById("edit-item-modal").style.justifyContent = "center";
             document.getElementById("edit-item-modal").style.alignItems = "center";
         })
-        .catch(error => console.error("❌ 获取类别列表失败:", error));
+        .catch(error => console.error("❌ Failed to fetch category list:", error));
     }
 }
 
-// 新增商品时，传入当前选中的类别 ID
+// When adding a new product, pass in the currently selected category ID
 function showAddItemForm() {
     let activeCategory = document.querySelector(".category-link.active");
-    let categoryId = activeCategory ? activeCategory.getAttribute("data-category-id") : ""; // 避免 undefined
+    let categoryId = activeCategory ? activeCategory.getAttribute("data-category-id") : ""; // Avoid undefined
     if (categoryId === "undefined" || categoryId === null) {
-        categoryId = ""; // 确保不会变成 undefined
+        categoryId = ""; // Ensure it does not become undefined
     }
 
-    console.log("📌 showAddItemForm 被调用，类别 ID:", categoryId);
-    editItem(null, categoryId); // 进入新增商品模式，并传入类别 ID
+    console.log("📌 showAddItemForm called, category ID:", categoryId);
+    editItem(null, categoryId); // Enter add product mode and pass the category ID
 }
 
-// 关闭弹窗
+// Close modal
 function closeEditItemModal() {
     document.getElementById("edit-item-modal").style.display = "none";
 }
 
-// 提交商品编辑
+// Submit product edit
 function saveItemEdit() {
-    let itemId = document.getElementById("edit-item-id").value.trim() || "new"; // ✅ 为空时传 "new"
-    const url = `/merchant/item/update/${itemId}/`;  // ✅ 确保 URL 正确
+    let itemId = document.getElementById("edit-item-id").value.trim() || "new"; // ✅ If empty, pass "new"
+    const url = `/merchant/item/update/${itemId}/`;  // ✅ Ensure the URL is correct
 
     const name = document.getElementById("edit-item-name").value.trim();
     const price = parseFloat(document.getElementById("edit-item-price").value);
@@ -408,17 +409,17 @@ function saveItemEdit() {
     const newCategory = parseInt(document.getElementById("edit-item-category").value, 10);
     const imageFile = document.getElementById("edit-item-image").files[0];
 
-    // ✅ 表单验证：防止提交空数据
+    // ✅ Form validation: Prevent submission of empty data
     if (!name) {
-        alert("⚠️ 请输入商品名称！");
+        alert("⚠️ Please enter the product name!");
         return;
     }
     if (!price || isNaN(price) || price <= 0) {
-        alert("⚠️ 请输入有效的价格！");
+        alert("⚠️ Please enter a valid price!");
         return;
     }
     if (!newCategory) {
-        alert("⚠️ 请选择商品类别！");
+        alert("⚠️ Please select a product category!");
         return;
     }
 
@@ -448,18 +449,18 @@ function saveItemEdit() {
             closeEditItemModal();
             loadItems(newCategory);
         } else {
-            alert(`❌ 更新失败: ${data.error}`);
+            alert(`❌ Update failed: ${data.error}`);
         }
     })
     .catch(error => {
-        console.error("❌ 更新商品信息失败:", error);
-        alert("❌ 商品更新失败，请检查网络或后端日志。");
+        console.error("❌ Failed to update product information:", error);
+        alert("❌ Product update failed, please check the network or backend logs.");
     });
 }
 
-// 删除商品
+// Delete product
 function deleteItem(itemId) {
-    if (!confirm("确定要删除该商品吗？")) return;
+    if (!confirm("Are you sure you want to delete this product?")) return;
 
     fetch(`/merchant/item/delete/${itemId}/`, {
         method: "POST",
@@ -468,29 +469,29 @@ function deleteItem(itemId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert("✅ 商品已删除！");
+            alert("✅ Product deleted!");
             loadItems();
         } else {
-            alert("❌ 删除失败: " + data.error);
+            alert("❌ Deletion failed: " + data.error);
         }
     })
-    .catch(error => console.error("❌ 删除商品失败:", error));
+    .catch(error => console.error("❌ Failed to delete product:", error));
 }
 
-// 获取用户评论
+// Fetch user reviews
 function loadReviews() {
-    console.log("🚀 正在加载用户评论...");
+    console.log("🚀 Loading user reviews...");
 
     fetch("/merchant/reviews/")
         .then(response => response.json())
         .then(data => {
-            console.log("✅ 获取评论数据:", data.reviews);  // **调试输出**
+            console.log("✅ Retrieved review data:", data.reviews);  // **Debugging output**
 
             const reviewContainer = document.getElementById("review-list");
             reviewContainer.innerHTML = "";
 
             if (data.reviews.length === 0) {
-                reviewContainer.innerHTML = "<p>暂无用户评论</p>";
+                reviewContainer.innerHTML = "<p>No user reviews available</p>";
                 return;
             }
 
@@ -500,24 +501,24 @@ function loadReviews() {
 
                 reviewCard.innerHTML = `
                     <div class="review-header">
-                        <strong>${review.username || "匿名用户"}</strong>
+                        <strong>${review.username || "Anonymous"}</strong>
                         <span class="review-date">${review.timestamp}</span>
                     </div>
-                    <div class="review-content">${review.comment || "无评论"}</div>
+                    <div class="review-content">${review.comment || "No comment"}</div>
                     <div class="review-rating" data-rating="${review.rating}">
-                        评分: ${"⭐".repeat(review.rating)}
+                        Rating: ${"⭐".repeat(review.rating)}
                     </div>
                 `;
                 reviewContainer.appendChild(reviewCard);
             });
         })
         .catch(error => {
-            console.error("❌ 获取用户评论失败:", error);
-            document.getElementById("review-list").innerHTML = "<p>无法加载用户评论，请稍后重试。</p>";
+            console.error("❌ Failed to fetch user reviews:", error);
+            document.getElementById("review-list").innerHTML = "<p>Unable to load user reviews, please try again later.</p>";
         });
 }
 
-
+// Get CSRF token
 function getCSRFToken() {
     return document.cookie.split('; ')
         .find(row => row.startsWith("csrftoken="))

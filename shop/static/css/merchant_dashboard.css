@@ -1,4 +1,4 @@
-/* 全局样式 */
+/* Global Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -6,20 +6,20 @@ body {
     background-color: #f4f4f4;
 }
 
-/* 顶部导航栏 */
+/* Top Navigation Bar */
 .navbar {
     background: #5a7f4f;
     padding: 10px 20px;
     color: white;
     display: flex;
     align-items: center;
-    justify-content: center; /* 使导航栏内容居中 */
+    justify-content: center; /* Center the navigation bar content */
     position: relative;
 }
 
-/* 商家名称（左上角，原 I FEEL 位置） */
+/* Store Name (Top Left Corner) */
 .store-info {
-    font-size: 22px; /* 增大字体 */
+    font-size: 22px; /* Increase font size */
     font-weight: bold;
     position: absolute;
     top: 50%;
@@ -27,7 +27,7 @@ body {
     transform: translateY(-50%);
 }
 
-/* 右上角登出按钮 */
+/* Logout Button (Top Right Corner) */
 .logout {
     position: absolute;
     right: 20px;
@@ -40,7 +40,7 @@ body {
     text-decoration: none;
 }
 
-/* 选项卡 */
+/* Navigation Tabs */
 .nav-links {
     display: flex;
     gap: 20px;
@@ -61,14 +61,14 @@ body {
     border-bottom: 3px solid white;
 }
 
-/* 主容器布局 */
+/* Main Container Layout */
 .container {
     display: flex;
     width: 100%;
     min-height: 100vh;
 }
 
-/* 侧边栏 */
+/* Sidebar */
 .sidebar {
     width: 160px;
     background: #5a7f4f;
@@ -80,14 +80,14 @@ body {
     align-items: center;
 }
 
-/* 侧边栏导航（字体放大） */
+/* Sidebar Navigation (Larger Font) */
 .sidebar a {
     display: block;
     color: white;
     padding: 14px;
     text-decoration: none;
     border-radius: 5px;
-    font-size: 20px; /* 进一步放大 */
+    font-size: 20px; /* Increase font size */
     text-align: center;
     margin-bottom: 8px;
 }
@@ -97,13 +97,13 @@ body {
     font-weight: bold;
 }
 
-/* 主要内容 */
+/* Main Content */
 .content {
     flex-grow: 1;
     padding: 20px;
 }
 
-/* 订单卡片 */
+/* Order Card */
 .order {
     background: white;
     padding: 15px;
@@ -112,14 +112,14 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* 订单项 */
+/* Order Item */
 .order-item {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-/* 商品图片放大 */
+/* Enlarged Product Image */
 .order-item img {
     width: 80px;
     height: 80px;
@@ -127,7 +127,7 @@ body {
     border-radius: 3px;
 }
 
-/* 商品管理 */
+/* Product Management */
 .product-container {
     display: flex;
     flex-wrap: wrap;
@@ -150,7 +150,7 @@ body {
     object-fit: cover;
 }
 
-/* 按钮样式 */
+/* Button Styles */
 .btn {
     padding: 8px 15px;
     border: none;
@@ -169,7 +169,7 @@ body {
     color: white;
 }
 
-/* 选项卡内容 */
+/* Tab Content */
 .tab-content {
     display: none;
 }
@@ -177,29 +177,30 @@ body {
 .tab-content.active {
     display: block;
 }
-/* 🛒 商品列表容器 */
+
+/* 🛒 Product List Container */
 #item-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;  /* 商品之间的间距 */
-    justify-content: flex-start;  /* 让商品从左到右排列 */
+    gap: 15px; /* Space between products */
+    justify-content: flex-start; /* Arrange products from left to right */
     padding: 10px;
 }
 
-/* 默认商品卡片样式 */
+/* Default Product Card Style */
 .item-card {
     background: white;
     padding: 15px;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     text-align: center;
-    width: 220px; /* 调整大小 */
+    width: 220px; /* Adjust size */
     display: inline-block;
     margin: 15px;
     transition: background 0.3s;
 }
 
-/* 📷 商品图片 */
+/* 📷 Product Image */
 .item-card img {
     width: 150px;
     height: 150px;
@@ -208,7 +209,7 @@ body {
     margin-bottom: 8px;
 }
 
-/* 🏷️ 商品信息 */
+/* 🏷️ Product Info */
 .item-info h3 {
     font-size: 16px;
     font-weight: bold;
@@ -221,7 +222,7 @@ body {
     margin: 4px 0;
 }
 
-/* ✅ 上架/下架按钮 */
+/* ✅ Toggle Availability Button */
 .toggle-availability-btn {
     width: 80px;
     padding: 6px 10px;
@@ -233,19 +234,19 @@ body {
     transition: background 0.2s ease-in-out;
 }
 
-/* 🔴 下架按钮样式 */
+/* 🔴 Unlist Button */
 .toggle-availability-btn.delist {
-    background: #e74c3c;  /* 红色 */
+    background: #e74c3c; /* Red */
     color: white;
 }
 
-/* 🟢 上架按钮样式 */
+/* 🟢 List Button */
 .toggle-availability-btn.list {
     background: #5a7f4f;
     color: white;
 }
 
-/* ✏️ 编辑 & 删除按钮 */
+/* ✏️ Edit & Delete Buttons */
 .edit-btn, .delete-btn {
     margin-top: 5px;
     padding: 6px 10px;
@@ -257,16 +258,16 @@ body {
 }
 
 .edit-btn {
-    background: #3498db;  /* 蓝色 */
+    background: #3498db; /* Blue */
     color: white;
 }
 
 .delete-btn {
-    background: #e74c3c;  /* 红色 */
+    background: #e74c3c; /* Red */
     color: white;
 }
 
-/* ➕ 新增商品按钮 */
+/* ➕ Add New Product Button */
 .add-item-card {
     width: 180px;
     height: 180px;
@@ -289,156 +290,7 @@ body {
     color: #666;
 }
 
-/* 📌 商品编辑弹窗整体 */
-#edit-item-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4); /* 半透明背景 */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-/* 📌 弹窗内容 */
-.modal-content {
-    background: white;
-    width: 500px; /* 控制宽度 */
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-/* ❌ 关闭按钮 */
-.modal-content .close {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    font-size: 22px;
-    cursor: pointer;
-    color: #aaa;
-    transition: color 0.3s;
-}
-
-.modal-content .close:hover {
-    color: #e74c3c;
-}
-
-/* 📌 标题 */
-.modal-content h2 {
-    margin-bottom: 15px;
-    font-size: 22px;
-    color: #333;
-    text-align: center;
-}
-
-/* 📌 表单行（让标题和输入框横向对齐） */
-.modal-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-}
-
-/* 📌 标签左对齐 */
-.modal-label {
-    width: 30%;
-    font-size: 14px;
-    color: #333;
-    font-weight: bold;
-}
-
-/* 📌 输入框样式 */
-.modal-input, .modal-textarea, .modal-select {
-    width: 65%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-.modal-textarea {
-    height: 60px;
-    resize: none;
-}
-
-/* 📷 商品图片预览 */
-.preview-image {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-    display: inline-block;
-}
-
-/* 📷 图片上传按钮 */
-#edit-item-image {
-    display: none;
-}
-
-.upload-btn {
-    display: inline-block;
-    background: #3498db;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.3s;
-}
-
-.upload-btn:hover {
-    background: #2980b9;
-}
-
-/* 📌 按钮 */
-.modal-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
-}
-
-.modal-buttons button {
-    flex: 1;
-    margin: 0 5px;
-    padding: 10px;
-    font-size: 16px;
-    border: none;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background 0.3s;
-}
-
-/* ✅ 保存按钮 */
-.save-btn {
-    background: #5a7f4f;
-    color: white;
-}
-
-.save-btn:hover {
-    background: #4e6b43;
-}
-
-/* ❌ 取消按钮 */
-.cancel-btn {
-    background: #e74c3c;
-    color: white;
-}
-
-.cancel-btn:hover {
-    background: #c0392b;
-}
-
-/* 评论区域整体样式 */
+/* 📌 Review Section */
 .review-container {
     max-width: 800px;
     margin: 20px auto;
@@ -448,7 +300,7 @@ body {
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* 评论标题 */
+/* Review Header */
 .review-container h2 {
     font-size: 24px;
     font-weight: bold;
@@ -458,7 +310,7 @@ body {
     padding-bottom: 5px;
 }
 
-/* 单个评论的卡片样式 */
+/* Individual Review Card */
 .review-card {
     background: #f9f9f9;
     padding: 15px;
@@ -472,7 +324,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* 用户名 & 时间 */
+/* Username & Timestamp */
 .review-header {
     display: flex;
     justify-content: space-between;
@@ -486,32 +338,17 @@ body {
     color: #333;
 }
 
-/* 评论内容 */
+/* Review Content */
 .review-content {
     font-size: 16px;
     color: #444;
     line-height: 1.5;
 }
 
-/* 评分样式 */
+/* Rating Styles */
 .review-rating {
-    color: #FFD700;  /* 金色星星 */
+    color: #FFD700; /* Gold Stars */
     font-size: 16px;
     font-weight: bold;
     margin-top: 5px;
-}
-
-/* 针对不同评分的颜色 */
-.review-rating[data-rating="5"] {
-    color: #28a745; /* 绿色 */
-}
-.review-rating[data-rating="4"] {
-    color: #17a2b8; /* 蓝色 */
-}
-.review-rating[data-rating="3"] {
-    color: #ffc107; /* 黄色 */
-}
-.review-rating[data-rating="2"],
-.review-rating[data-rating="1"] {
-    color: #dc3545; /* 红色 */
 }

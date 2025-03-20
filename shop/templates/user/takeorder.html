@@ -3,15 +3,15 @@
 <html>
   <head>
     <title>Take Order</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/user.css' %}?v=3">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/user.css' %}?v=4">
   </head>
   <body>
     <button class="logout-btn" onclick="window.location.href='/logout/'">🚪 Logout</button>
-<!-- 商家标题 -->
+    <!-- Merchant Title -->
     <div class="store-header">Welcome to {{ merchant.store_name }}</div>
 
     <div class="main-container">
-      <!-- 左侧导航 -->
+      <!-- Left Sidebar Navigation -->
       <div class="sidebar">
         <div class="nav-title">Categories</div>
         {% for category in categories %}
@@ -22,7 +22,7 @@
         {% endfor %}
       </div>
 
-      <!-- 中间商品列表 -->
+      <!-- Center Product List -->
       <div class="content">
         <div class="item-grid">
           {% for item in items %}
@@ -33,7 +33,7 @@
                 <h3 class="item-name">{{ item.name }}</h3>
                 <p class="item-price">£{{ item.price }}</p>
                 <button class="btn-success" onclick="event.stopPropagation(); addToBasket({{ item.id }})">
-                    加入购物车
+                    Add to Cart
                 </button>
             </div>
           {% empty %}
@@ -42,34 +42,34 @@
         </div>
       </div>
 
-      <!-- 购物车 -->
+      <!-- Shopping Cart -->
       <div class="cart-sidebar">
-        <h3>🛒 购物车</h3>
+        <h3>🛒 Shopping Cart</h3>
         <div id="cart-items">
-          <!-- 购物车内容动态加载 -->
+          <!-- Cart content dynamically loaded -->
         </div>
-          <p id="cart-total-price" style="text-align: right; font-weight: bold; font-size: 18px; margin-top: 10px;">
-        总价: £0.00
-          </p>
+        <p id="cart-total-price" style="text-align: right; font-weight: bold; font-size: 18px; margin-top: 10px;">
+        Total: £0.00
+        </p>
         <button class="checkout-btn" onclick="checkout()">Checkout</button>
-           <!-- 新增查看所有订单 111-->
+        <!-- View All Orders Button -->
         <button onclick="window.location.href='/my_orders/'" style="margin-top: 10px; width: 100%;">View All Orders</button>
       </div>
     </div>
 
-    <!-- 商品详情弹窗 -->
+    <!-- Product Detail Modal -->
     <div id="product-detail" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close-btn" onclick="closeItemDetail()">&times;</span>
             <div id="product-detail-content">
-                <img id="detail-image" class="detail-image" src="" alt="商品图片" style="width: 100%; max-height: 300px; object-fit: cover; display: none;"/>
+                <img id="detail-image" class="detail-image" src="" alt="Product Image" style="width: 100%; max-height: 300px; object-fit: cover; display: none;"/>
                 <h1 id="detail-name"></h1>
                 <p class="price">Price: £<span id="detail-price"></span></p>
                 <div class="description">
                     <h3>Product Description</h3>
                     <p id="detail-description"></p>
                 </div>
-                <button id="detail-add-cart" class="btn-success">加入购物车</button>
+                <button id="detail-add-cart" class="btn-success">Add to Cart</button>
             </div>
         </div>
     </div>
