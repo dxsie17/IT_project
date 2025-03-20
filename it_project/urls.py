@@ -17,9 +17,14 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse
 from shop import views
 
+def home(request):
+    return HttpResponse("<h1>Welcome to IT Project</h1>")
+
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path('admin/', admin.site.urls),
+    path("", home, name="home"),
     path("", include("shop.urls")),
-]
+    ]
