@@ -19,7 +19,10 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "shop/static")]
+
+if not os.getenv("RENDER"):  # 本地环境
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, "shop/static")]
+
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Quick-start development settings - unsuitable for production
@@ -30,9 +33,6 @@ SECRET_KEY = "django-insecure-gu8$x)j^l^os+d4)u@&d4zgz70kz3in3^1@y@48$2wmt4ybgm7
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-if os.getenv("RENDER"):
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "6cf13i6ohbfBdrA_01KLFZOtvuyritJBINDh8osHPt57QOv71waTkymyhx6dDBbAbGQ")
 DEBUG = os.getenv("DEBUG", "True") == "True"
@@ -54,11 +54,17 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "whitenoise.runserver_nostatic",
     "django_extensions",
     "shop.apps.ShopConfig",
+    "corsheaders",
 ]
 
+if os.getenv("RENDER"):
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -70,6 +76,16 @@ MIDDLEWARE = [
 
 ]
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+CORS_ALLOW_CREDENTIALS = True
+
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True  # 本地开发时允许所有来源
+else:
+    CORS_ALLOWED_ORIGINS = [
+        "https://it-project-65ic.onrender.com",
+    ]
+
+CORS_ALLOW_CREDENTIALS = True
 
 # CSRF_COOKIE_SECURE = False  # 禁用 HTTPS 限制，开发环境必须设置为 False
 # CSRF_USE_SESSIONS = False  # 使用 Session 存储 CSRF 令牌
@@ -159,7 +175,3 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-    CSRF_COOKIE_SECURE = False
