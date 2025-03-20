@@ -383,12 +383,12 @@ function editItem(itemId = null, categoryId = "") {
 
 // When adding a new product, pass in the currently selected category ID
 function showAddItemForm() {
+    document.getElementById('edit-item-modal').style.display = 'block';
     let activeCategory = document.querySelector(".category-link.active");
     let categoryId = activeCategory ? activeCategory.getAttribute("data-category-id") : ""; // Avoid undefined
-    if (categoryId === "undefined" || categoryId === null) {
-        categoryId = ""; // Ensure it does not become undefined
-    }
-
+    // if (categoryId === "undefined" || categoryId === null) {
+    //     categoryId = ""; // Ensure it does not become undefined
+    // }
     console.log("📌 showAddItemForm called, category ID:", categoryId);
     editItem(null, categoryId); // Enter add product mode and pass the category ID
 }

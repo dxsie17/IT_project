@@ -1,4 +1,4 @@
-/* Global Styles */
+/* Global styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -6,18 +6,18 @@ body {
     background-color: #f4f4f4;
 }
 
-/* Top Navigation Bar */
+/* Top navigation bar */
 .navbar {
     background: #5a7f4f;
     padding: 10px 20px;
     color: white;
     display: flex;
     align-items: center;
-    justify-content: center; /* Center the navigation bar content */
+    justify-content: center; /* Centers the navigation bar content */
     position: relative;
 }
 
-/* Store Name (Top Left Corner) */
+/* Store name (top left corner, originally "I FEEL" position) */
 .store-info {
     font-size: 22px; /* Increase font size */
     font-weight: bold;
@@ -27,7 +27,7 @@ body {
     transform: translateY(-50%);
 }
 
-/* Logout Button (Top Right Corner) */
+/* Logout button (top right corner) */
 .logout {
     position: absolute;
     right: 20px;
@@ -40,7 +40,7 @@ body {
     text-decoration: none;
 }
 
-/* Navigation Tabs */
+/* Navigation tabs */
 .nav-links {
     display: flex;
     gap: 20px;
@@ -61,7 +61,7 @@ body {
     border-bottom: 3px solid white;
 }
 
-/* Main Container Layout */
+/* Main container layout */
 .container {
     display: flex;
     width: 100%;
@@ -80,14 +80,14 @@ body {
     align-items: center;
 }
 
-/* Sidebar Navigation (Larger Font) */
+/* Sidebar navigation (larger font) */
 .sidebar a {
     display: block;
     color: white;
     padding: 14px;
     text-decoration: none;
     border-radius: 5px;
-    font-size: 20px; /* Increase font size */
+    font-size: 20px; /* Further enlarge the font */
     text-align: center;
     margin-bottom: 8px;
 }
@@ -97,13 +97,13 @@ body {
     font-weight: bold;
 }
 
-/* Main Content */
+/* Main content */
 .content {
     flex-grow: 1;
     padding: 20px;
 }
 
-/* Order Card */
+/* Order card */
 .order {
     background: white;
     padding: 15px;
@@ -112,14 +112,14 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Order Item */
+/* Order item */
 .order-item {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-/* Enlarged Product Image */
+/* Enlarged product image */
 .order-item img {
     width: 80px;
     height: 80px;
@@ -127,7 +127,7 @@ body {
     border-radius: 3px;
 }
 
-/* Product Management */
+/* Product management */
 .product-container {
     display: flex;
     flex-wrap: wrap;
@@ -150,7 +150,7 @@ body {
     object-fit: cover;
 }
 
-/* Button Styles */
+/* Button styles */
 .btn {
     padding: 8px 15px;
     border: none;
@@ -169,7 +169,7 @@ body {
     color: white;
 }
 
-/* Tab Content */
+/* Tab content */
 .tab-content {
     display: none;
 }
@@ -182,8 +182,8 @@ body {
 #item-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px; /* Space between products */
-    justify-content: flex-start; /* Arrange products from left to right */
+    gap: 15px;  /* Spacing between products */
+    justify-content: flex-start;  /* Arrange products from left to right */
     padding: 10px;
 }
 
@@ -209,7 +209,7 @@ body {
     margin-bottom: 8px;
 }
 
-/* 🏷️ Product Info */
+/* 🏷️ Product Information */
 .item-info h3 {
     font-size: 16px;
     font-weight: bold;
@@ -222,7 +222,7 @@ body {
     margin: 4px 0;
 }
 
-/* ✅ Toggle Availability Button */
+/* ✅ List/Delist Button */
 .toggle-availability-btn {
     width: 80px;
     padding: 6px 10px;
@@ -234,13 +234,13 @@ body {
     transition: background 0.2s ease-in-out;
 }
 
-/* 🔴 Unlist Button */
+/* 🔴 Delist Button Style */
 .toggle-availability-btn.delist {
-    background: #e74c3c; /* Red */
+    background: #e74c3c;  /* Red */
     color: white;
 }
 
-/* 🟢 List Button */
+/* 🟢 List Button Style */
 .toggle-availability-btn.list {
     background: #5a7f4f;
     color: white;
@@ -258,16 +258,16 @@ body {
 }
 
 .edit-btn {
-    background: #3498db; /* Blue */
+    background: #3498db;  /* Blue */
     color: white;
 }
 
 .delete-btn {
-    background: #e74c3c; /* Red */
+    background: #e74c3c;  /* Red */
     color: white;
 }
 
-/* ➕ Add New Product Button */
+/* ➕ Add Product Button */
 .add-item-card {
     width: 180px;
     height: 180px;
@@ -290,7 +290,156 @@ body {
     color: #666;
 }
 
-/* 📌 Review Section */
+/* 📌 Product Edit Modal */
+#edit-item-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* 📌 Modal Content */
+.modal-content {
+    background: white;
+    width: 500px; /* Control the width */
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* ❌ Close Button */
+.modal-content .close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 22px;
+    cursor: pointer;
+    color: #aaa;
+    transition: color 0.3s;
+}
+
+.modal-content .close:hover {
+    color: #e74c3c;
+}
+
+/* 📌 Title */
+.modal-content h2 {
+    margin-bottom: 15px;
+    font-size: 22px;
+    color: #333;
+    text-align: center;
+}
+
+/* 📌 Form Row (Align title and input horizontally) */
+.modal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+/* 📌 Label (left aligned) */
+.modal-label {
+    width: 30%;
+    font-size: 14px;
+    color: #333;
+    font-weight: bold;
+}
+
+/* 📌 Input Box Style */
+.modal-input, .modal-textarea, .modal-select {
+    width: 65%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.modal-textarea {
+    height: 60px;
+    resize: none;
+}
+
+/* 📷 Product Image Preview */
+.preview-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    display: inline-block;
+}
+
+/* 📷 Image Upload Button */
+#edit-item-image {
+    display: none;
+}
+
+.upload-btn {
+    display: inline-block;
+    background: #3498db;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.upload-btn:hover {
+    background: #2980b9;
+}
+
+/* 📌 Buttons */
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.modal-buttons button {
+    flex: 1;
+    margin: 0 5px;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.3s;
+}
+
+/* ✅ Save Button */
+.save-btn {
+    background: #5a7f4f;
+    color: white;
+}
+
+.save-btn:hover {
+    background: #4e6b43;
+}
+
+/* ❌ Cancel Button */
+.cancel-btn {
+    background: #e74c3c;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #c0392b;
+}
+
+/* Review Section Overall Style */
 .review-container {
     max-width: 800px;
     margin: 20px auto;
@@ -300,7 +449,7 @@ body {
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Review Header */
+/* Review Title */
 .review-container h2 {
     font-size: 24px;
     font-weight: bold;
@@ -310,7 +459,7 @@ body {
     padding-bottom: 5px;
 }
 
-/* Individual Review Card */
+/* Single Review Card Style */
 .review-card {
     background: #f9f9f9;
     padding: 15px;
@@ -324,7 +473,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* Username & Timestamp */
+/* Username & Time */
 .review-header {
     display: flex;
     justify-content: space-between;
@@ -345,10 +494,25 @@ body {
     line-height: 1.5;
 }
 
-/* Rating Styles */
+/* Rating Style */
 .review-rating {
-    color: #FFD700; /* Gold Stars */
+    color: #FFD700;  /* Gold stars */
     font-size: 16px;
     font-weight: bold;
     margin-top: 5px;
+}
+
+/* Colors for Different Ratings */
+.review-rating[data-rating="5"] {
+    color: #28a745; /* Green */
+}
+.review-rating[data-rating="4"] {
+    color: #17a2b8; /* Blue */
+}
+.review-rating[data-rating="3"] {
+    color: #ffc107; /* Yellow */
+}
+.review-rating[data-rating="2"],
+.review-rating[data-rating="1"] {
+    color: #dc3545; /* Red */
 }
