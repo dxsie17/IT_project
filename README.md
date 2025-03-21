@@ -1,9 +1,9 @@
 Here's merchant and customer accounts and passwords that you can have a test:
 
-merchant:
+[merchant]
 mmm@123.com
-123
+pwd:123
 
-customer:
+[customer]
 ccc@123.com
-123
+pwd:123
