@@ -1,4 +1,4 @@
-Here's merchant and customer accounts and passwords that you can have a test:
+Here are merchant and customer accounts and passwords that you can have directly login:
 
 [merchant]
 mmm@123.com
